@@ -1,0 +1,14 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.kevincheng.logger">
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <application>
+        <provider
+            android:name=".LoggerInstaller"
+            android:authorities="${applicationId}.logger-installer"
+            android:exported="false"/>
+    </application>
+</manifest>
+
