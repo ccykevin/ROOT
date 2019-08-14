@@ -11,10 +11,7 @@ internal class AppExtensionsInstaller : ContentProvider() {
 
     override fun onCreate(): Boolean {
         val application = context!!.applicationContext as Application
-
-        App.shared.applicationContext = application.applicationContext
-        application.registerActivityLifecycleCallbacks(App.shared)
-
+        App.install(application)
         return true
     }
 

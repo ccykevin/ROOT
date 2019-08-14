@@ -10,6 +10,7 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Looper
 import android.os.SystemClock
 import androidx.core.content.FileProvider
 import com.jaredrummler.android.shell.Shell
@@ -22,9 +23,18 @@ import java.io.File
 import java.lang.ref.WeakReference
 import kotlin.system.exitProcess
 
-class App : Application.ActivityLifecycleCallbacks {
+class App(private val applicationContext: Context) : Application.ActivityLifecycleCallbacks {
     companion object {
-        internal val shared = App()
+        private lateinit var shared: App
+
+        internal fun install(application: Application) {
+            when (::shared.isInitialized) {
+                false -> {
+                    shared = App(application.applicationContext)
+                    application.registerActivityLifecycleCallbacks(shared)
+                }
+            }
+        }
 
         val context: Context get() = shared.applicationContext
         val currentActivity: Activity? get() = shared.currentActivityWeakReference?.get()
@@ -97,7 +107,6 @@ class App : Application.ActivityLifecycleCallbacks {
     }
 
     private var currentActivityWeakReference: WeakReference<Activity>? = null
-    internal lateinit var applicationContext: Context
 
     override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {
         activity?.apply {
