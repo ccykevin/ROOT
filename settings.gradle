@@ -1,1 +1,1 @@
-include ':app', ':logger', ':extensions'
+include ':app', ':logger', ':extensions', ':app-extensions'
