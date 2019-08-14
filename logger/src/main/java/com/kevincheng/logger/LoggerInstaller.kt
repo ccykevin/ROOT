@@ -5,23 +5,12 @@ import android.content.ContentProvider
 import android.content.ContentValues
 import android.database.Cursor
 import android.net.Uri
-import com.orhanobut.logger.AndroidLogAdapter
-import com.orhanobut.logger.Logger
 
 internal class LoggerInstaller : ContentProvider() {
 
     override fun onCreate(): Boolean {
-        val appContext = context!!.applicationContext as Application
-
-        when (LoggerBuildConfig.isLoggable(appContext)) {
-            true -> {
-                Logger.addLogAdapter(AndroidLogAdapter())
-                when (LoggerBuildConfig.createLogFile(appContext)) {
-                    true -> Logger.addLogAdapter(CsvFileLogAdapter.create(appContext))
-                }
-            }
-        }
-
+        val application = context!!.applicationContext as Application
+        AppLogger.install(application)
         return true
     }
 
