@@ -15,6 +15,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField 'Boolean', 'loggable', 'true'
         buildConfigField 'Boolean', 'logFile', 'true'
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -35,4 +36,5 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation project(path: ':logger')
     implementation project(path: ':extensions')
+    implementation project(path: ':app-extensions')
 }
