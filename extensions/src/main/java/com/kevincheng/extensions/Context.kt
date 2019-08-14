@@ -29,7 +29,7 @@ inline val Context.isGrantedRequiredPermissions: Boolean
         else -> true
     }
 
-inline val Context.launcherIntent: Intent?
+inline val Context.launchIntent: Intent?
     get() = packageManager.getLaunchIntentForPackage(packageName)
 
 inline val Context.defaultSharedPreferences: SharedPreferences
