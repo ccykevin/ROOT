@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.os.SystemClock
+import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
 import com.jaredrummler.android.shell.Shell
 import com.kevincheng.extensions.defaultSharedPreferences
@@ -64,7 +65,7 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
             exitProcess(0)
         }
 
-        fun installUpdate(apk: File, mimeType: String) {
+        fun update(apk: File) {
             when (Shell.SU.available()) {
                 true -> {
                     val launcherComponent = launchIntent?.component?.flattenToString()
@@ -83,6 +84,10 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
                             apk
                         )
                         else -> Uri.fromFile(apk)
+                    }
+                    val mimeType = apk.let {
+                        MimeTypeMap.getSingleton()
+                            .getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(it.absolutePath))
                     }
                     val intent = Intent(Intent.ACTION_VIEW, fileUri)
                     intent.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
