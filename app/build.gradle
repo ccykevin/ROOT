@@ -39,4 +39,5 @@ dependencies {
     implementation project(path: ':logger')
     implementation project(path: ':extensions')
     implementation project(path: ':app-extensions')
+    implementation project(path: ':device-extensions')
 }
