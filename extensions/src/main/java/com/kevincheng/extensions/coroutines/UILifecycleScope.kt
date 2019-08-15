@@ -1,4 +1,4 @@
-package com.kevincheng.extensions
+package com.kevincheng.extensions.coroutines
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver

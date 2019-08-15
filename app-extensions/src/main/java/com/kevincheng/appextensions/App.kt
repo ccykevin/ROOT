@@ -6,15 +6,13 @@ import android.app.Application
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Looper
 import android.os.SystemClock
+import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
 import com.jaredrummler.android.shell.Shell
-import com.kevincheng.extensions.defaultSharedPreferences
 import com.kevincheng.extensions.isGrantedRequiredPermissions
 import com.kevincheng.extensions.launchIntent
 import com.kevincheng.extensions.requiredPermissions
@@ -41,7 +39,6 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
         val launchIntent: Intent? get() = context.launchIntent
         val requiredPermissions: Array<String> get() = context.requiredPermissions
         val isGrantedRequiredPermissions: Boolean get() = context.isGrantedRequiredPermissions
-        val defaultSharedPreferences: SharedPreferences get() = context.defaultSharedPreferences
 
         fun relaunch() {
             launchIntent?.apply {
@@ -64,7 +61,7 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
             exitProcess(0)
         }
 
-        fun installUpdate(apk: File, mimeType: String) {
+        fun update(apk: File) {
             when (Shell.SU.available()) {
                 true -> {
                     val launcherComponent = launchIntent?.component?.flattenToString()
@@ -84,6 +81,10 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
                         )
                         else -> Uri.fromFile(apk)
                     }
+                    val mimeType = apk.let {
+                        MimeTypeMap.getSingleton()
+                            .getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(it.absolutePath))
+                    }
                     val intent = Intent(Intent.ACTION_VIEW, fileUri)
                     intent.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
                     intent.setDataAndType(fileUri, mimeType)
@@ -92,17 +93,6 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
                     context.startActivity(intent)
                 }
             }
-        }
-
-        fun getPreferenceAsString(strId: Int, defStrId: Int): String {
-            return defaultSharedPreferences.getString(context.getString(strId), null) ?: context.getString(defStrId)
-        }
-
-        fun getPreferenceAsBoolean(strId: Int, defStrId: Int): Boolean {
-            return defaultSharedPreferences.getBoolean(
-                context.getString(strId),
-                context.resources.getBoolean(defStrId)
-            )
         }
     }
 

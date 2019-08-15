@@ -4,6 +4,8 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
+apply from: "$rootDir/ktlint.gradle"
+
 android {
     compileSdkVersion 28
     defaultConfig {
@@ -37,4 +39,5 @@ dependencies {
     implementation project(path: ':logger')
     implementation project(path: ':extensions')
     implementation project(path: ':app-extensions')
+    implementation project(path: ':device-extensions')
 }
