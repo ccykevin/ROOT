@@ -3,7 +3,7 @@ package com.kevincheng.appextensions
 import android.content.SharedPreferences
 import com.kevincheng.extensions.defaultSharedPreferences
 
-class AppPreferences {
+class Preferences {
     companion object {
         private val sharedPreferences: SharedPreferences by lazy { App.context.defaultSharedPreferences }
 
