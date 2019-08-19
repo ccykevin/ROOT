@@ -17,6 +17,8 @@ import com.kevincheng.extensions.isGrantedRequiredPermissions
 import com.kevincheng.extensions.launchIntent
 import com.kevincheng.extensions.requiredPermissions
 import com.kevincheng.extensions.setAlarm
+import com.orhanobut.logger.Logger
+import java.io.DataOutputStream
 import java.io.File
 import java.lang.ref.WeakReference
 import kotlin.system.exitProcess
@@ -67,10 +69,19 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
                     val launcherComponent = launchIntent?.component?.flattenToString()
                     val restartCommand = launcherComponent?.let { "am start -n $launcherComponent" }
                         ?: "monkey -p ${context.packageName} -c android.intent.category.LAUNCHER 1"
-                    Shell.SU.run(
-                        "pm install -rdg ${apk.absolutePath}",
-                        restartCommand
-                    )
+                    try {
+                        Runtime.getRuntime().exec("su").apply {
+                            val commands = DataOutputStream(outputStream)
+                            commands.writeBytes("pm install -rdg ${apk.absolutePath}\n")
+                            commands.writeBytes("$restartCommand\n")
+                            commands.writeBytes("exit\n")
+                            commands.flush()
+                            waitFor()
+                            commands.close()
+                        }
+                    } catch (e: Exception) {
+                        Logger.e(e, "Update Failed")
+                    }
                 }
                 else -> {
                     val fileUri = when {
