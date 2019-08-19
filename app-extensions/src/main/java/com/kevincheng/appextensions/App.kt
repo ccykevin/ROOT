@@ -9,6 +9,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
@@ -69,18 +71,22 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
                     val launcherComponent = launchIntent?.component?.flattenToString()
                     val restartCommand = launcherComponent?.let { "am start -n $launcherComponent" }
                         ?: "monkey -p ${context.packageName} -c android.intent.category.LAUNCHER 1"
-                    try {
-                        Runtime.getRuntime().exec("su").apply {
-                            val commands = DataOutputStream(outputStream)
-                            commands.writeBytes("pm install -rdg ${apk.absolutePath}\n")
-                            commands.writeBytes("$restartCommand\n")
-                            commands.writeBytes("exit\n")
-                            commands.flush()
-                            waitFor()
-                            commands.close()
+                    Thread(Runnable {
+                        try {
+                            Runtime.getRuntime().exec("su").apply {
+                                val commands = DataOutputStream(outputStream)
+                                commands.writeBytes("pm install -rdg ${apk.absolutePath}\n")
+                                commands.writeBytes("$restartCommand\n")
+                                commands.writeBytes("exit\n")
+                                commands.flush()
+                                waitFor()
+                                commands.close()
+                            }
+                        } catch (e: Exception) {
+                            Logger.e(e, "Update Failed")
                         }
-                    } catch (e: Exception) {
-                        Logger.e(e, "Update Failed")
+                    }, "silent-install-thread").apply {
+                        start()
                     }
                 }
                 else -> {
