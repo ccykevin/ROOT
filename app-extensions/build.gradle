@@ -42,4 +42,6 @@ dependencies {
     implementation project(path: ':extensions')
     // Android Shell
     implementation 'com.jaredrummler:android-shell:1.0.0'
+    // Logger
+    implementation 'com.orhanobut:logger:2.2.0'
 }
