@@ -35,7 +35,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    implementation project(path: ':app-extensions')
+    compileOnly project(path: ':app-extensions')
     // Android Shell
     implementation 'com.jaredrummler:android-shell:1.0.0'
     // RootTools
