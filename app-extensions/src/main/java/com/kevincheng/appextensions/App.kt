@@ -20,7 +20,6 @@ import com.kevincheng.extensions.launchIntent
 import com.kevincheng.extensions.requiredPermissions
 import com.kevincheng.extensions.setAlarm
 import com.orhanobut.logger.Logger
-import java.io.DataOutputStream
 import java.io.File
 import java.lang.ref.WeakReference
 import kotlin.system.exitProcess
