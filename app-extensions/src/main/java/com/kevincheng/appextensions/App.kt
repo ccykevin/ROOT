@@ -61,6 +61,7 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
                 SystemClock.elapsedRealtime() + 100,
                 pendingIntent
             )
+            scheduleRestartChecker()
             exitProcess(0)
         }
 
@@ -71,6 +72,7 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
                     val restartCommand = launcherComponent?.let { "am start -n $launcherComponent" }
                         ?: "monkey -p ${context.packageName} -c android.intent.category.LAUNCHER 1"
                     Handler(Looper.getMainLooper()).post {
+                        scheduleRestartChecker()
                         val result = Shell.SU.run("pm install -rdg ${apk.absolutePath}", restartCommand)
                         Logger.d(
                             "${when (result.isSuccessful) {
@@ -105,6 +107,18 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
                     context.startActivity(intent)
                 }
             }
+        }
+
+        private fun scheduleRestartChecker() {
+            val intent = Intent("${context.packageName}.APP_EXTENSIONS_RESTART_CHECKING")
+            val pendingIntent =
+                PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_ONE_SHOT)
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            alarmManager.setAlarm(
+                AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() + 1000 * 60,
+                pendingIntent
+            )
         }
     }
 
