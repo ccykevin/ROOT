@@ -21,10 +21,10 @@ internal class CsvFormatStrategy(private val logStrategy: LogStrategy) : FormatS
         const val LOGGER_ASSERT_STRING = "ASSERT"
     }
 
-    private val dateFormatter = SimpleDateFormat("yyyy.MM.dd HH:mm:ss.SSS", Locale.getDefault())
+    private val dateFormatter = SimpleDateFormat("yyyy.MM.dd HH:mm:ss.SSS", Locale.UK)
 
     override fun log(priority: Int, onceOnlyTag: String?, message: String) {
-        var logMessage = message
+        val logMessage = message.takeIf { it.contains(NEW_LINE) }?.replace(NEW_LINE.toRegex(), NEW_LINE_REPLACEMENT) ?: message
 
         val date = Calendar.getInstance().time
 
@@ -41,30 +41,6 @@ internal class CsvFormatStrategy(private val logStrategy: LogStrategy) : FormatS
         builder.append(SEPARATOR)
         builder.append(logLevel(priority))
 
-        val currentThread = Thread.currentThread()
-        val stackTrace = currentThread.stackTrace
-        var index = -1
-        for (i in 0 until stackTrace.size) {
-            val element = stackTrace[i]
-            if (element.className.equals("com.orhanobut.logger.Logger")) {
-                index = i + 1
-                break
-            }
-        }
-        val caller = currentThread.stackTrace[index]
-
-        // thread
-        builder.append(SEPARATOR)
-        builder.append("[${currentThread.name}:${currentThread.id}]")
-
-        // file detail
-        builder.append(SEPARATOR)
-        builder.append("[${caller.fileName}:${caller.lineNumber}]")
-
-        // caller detail
-        builder.append(SEPARATOR)
-        builder.append("[${caller.className}.${caller.methodName}]")
-
         // tag
         onceOnlyTag?.apply {
             builder.append(SEPARATOR)
@@ -72,10 +48,6 @@ internal class CsvFormatStrategy(private val logStrategy: LogStrategy) : FormatS
         }
 
         // message
-        if (logMessage.contains(NEW_LINE)) {
-            // a new line would break the CSV format, so we replace it here
-            logMessage = logMessage.replace(NEW_LINE.toRegex(), NEW_LINE_REPLACEMENT)
-        }
         builder.append(SEPARATOR)
         builder.append(logMessage)
 
