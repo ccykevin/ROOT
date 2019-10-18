@@ -16,5 +16,11 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_provider_paths" />
         </provider>
+
+        <receiver android:name=".internal.RestartChecker">
+            <intent-filter>
+                <action android:name="${applicationId}.APP_EXTENSIONS_RESTART_CHECKING" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>
