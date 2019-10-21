@@ -22,6 +22,12 @@ import java.util.Locale
  */
 internal class DiskLogStrategy(private val handler: Handler) : LogStrategy {
 
+    companion object {
+        val dateDirectoryFormatter = SimpleDateFormat("yyyyMMdd", Locale.UK)
+
+        fun rootDirectory(context: Context): File = File(Environment.getExternalStorageDirectory(), "logger/${context.packageName}")
+    }
+
     override fun log(priority: Int, tag: String?, message: String) {
         // do nothing on the calling thread, simply pass the tag/msg to the background thread
         handler.sendMessage(handler.obtainMessage(priority, message))
@@ -32,8 +38,7 @@ internal class DiskLogStrategy(private val handler: Handler) : LogStrategy {
         private val CSV_FILE_NAME_FORMAT = "%s_%s_%d.csv"
         private val MAXIMUM_LOG_FILE_SIZE = 1 * 1024 * 1024 // 1MB
         private val packageName = context.packageName
-        private val LOG_FILES_DIRECTORY = File(Environment.getExternalStorageDirectory(), "logger/$packageName")
-        private val dateFormatter = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        private val ROOT_DIRECTORY = rootDirectory(context)
         private val dailyLogFileCounter: HashMap<String, Int> = hashMapOf()
 
         override fun handleMessage(msg: Message?) {
@@ -66,14 +71,16 @@ internal class DiskLogStrategy(private val handler: Handler) : LogStrategy {
         }
 
         private fun getLogFile(): File {
-            val date = dateFormatter.format(Calendar.getInstance().time)
+            val date = dateDirectoryFormatter.format(Calendar.getInstance().time)
 
-            if (!LOG_FILES_DIRECTORY.exists()) LOG_FILES_DIRECTORY.mkdirs()
+            val directory = File(ROOT_DIRECTORY, date)
+
+            if (!directory.exists()) directory.mkdirs()
 
             var fileCounter = dailyLogFileCounter[date] ?: 0
             while (true) {
                 val logFileName = String.format(CSV_FILE_NAME_FORMAT, packageName, date, fileCounter)
-                val logFile = File(LOG_FILES_DIRECTORY, logFileName)
+                val logFile = File(directory, logFileName)
                 when {
                     !logFile.exists() || (logFile.exists() && logFile.length() < MAXIMUM_LOG_FILE_SIZE) -> {
                         dailyLogFileCounter[date] = fileCounter
