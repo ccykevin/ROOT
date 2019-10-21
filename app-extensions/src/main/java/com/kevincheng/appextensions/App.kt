@@ -6,6 +6,7 @@ import android.app.Application
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -19,9 +20,11 @@ import com.kevincheng.extensions.isGrantedRequiredPermissions
 import com.kevincheng.extensions.launchIntent
 import com.kevincheng.extensions.requiredPermissions
 import com.kevincheng.extensions.setAlarm
+import com.kevincheng.extensions.toHex
 import com.orhanobut.logger.Logger
 import java.io.File
 import java.lang.ref.WeakReference
+import java.security.MessageDigest
 import kotlin.system.exitProcess
 
 class App(private val applicationContext: Context) : Application.ActivityLifecycleCallbacks {
@@ -42,6 +45,24 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
         val launchIntent: Intent? get() = context.launchIntent
         val requiredPermissions: Array<String> get() = context.requiredPermissions
         val isGrantedRequiredPermissions: Boolean get() = context.isGrantedRequiredPermissions
+        val signatures: String
+            get() = when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.P -> {
+                    context.packageManager.getPackageInfo(context.packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+                        .signingInfo.let {
+                        when {
+                            it.hasMultipleSigners() -> it.apkContentsSigners
+                            else -> it.signingCertificateHistory
+                        }
+                    }
+                }
+                else -> context.packageManager.getPackageInfo(
+                    context.packageName,
+                    PackageManager.GET_SIGNATURES
+                ).signatures
+            }.joinToString("") {
+                MessageDigest.getInstance("SHA").apply { update(it.toByteArray()) }.digest().toHex
+            }
 
         fun relaunch() {
             launchIntent?.apply {
