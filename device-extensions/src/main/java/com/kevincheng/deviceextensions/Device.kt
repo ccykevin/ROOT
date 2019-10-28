@@ -40,8 +40,9 @@ class Device {
             }
         }
 
-        fun reboot() {
+        fun reboot(): Boolean {
             if (isRooted) RootTools.restartAndroid()
+            return isRooted
         }
     }
 }
