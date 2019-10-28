@@ -14,8 +14,8 @@ android {
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
-        buildConfigField 'Boolean', 'loggable', 'true'
-        buildConfigField 'Boolean', 'logFile', 'true'
+        resValue("bool", "logger_loggable", "true")
+        resValue("bool", "logger_logFile", "true")
         multiDexEnabled true
     }
     buildTypes {

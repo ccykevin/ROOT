@@ -13,10 +13,10 @@ internal class AppLogger {
         internal fun install(application: Application) {
             if (!installed) {
                 val context = application.applicationContext
-                when (LoggerBuildConfig.isLoggable(context)) {
+                when (context.resources.getBoolean(R.bool.logger_loggable)) {
                     true -> {
                         Logger.addLogAdapter(AndroidLogAdapter())
-                        when (LoggerBuildConfig.createLogFile(context)) {
+                        when (context.resources.getBoolean(R.bool.logger_logFile)) {
                             true -> Logger.addLogAdapter(CsvFileLogAdapter.create(context))
                         }
                     }
