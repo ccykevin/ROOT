@@ -27,13 +27,9 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.core:core-ktx:1.0.2'
-    // Android Shell
     implementation 'com.jaredrummler:android-shell:1.0.0'
-    // RootTools
     implementation('com.github.Stericson:RootTools:5.0') { transitive = false }
     implementation 'com.github.Stericson:RootShell:1.6'
 }
