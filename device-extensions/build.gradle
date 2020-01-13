@@ -31,7 +31,6 @@ dependencies {
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.core:core-ktx:1.0.2'
-    compileOnly project(path: ':app-extensions')
     // Android Shell
     implementation 'com.jaredrummler:android-shell:1.0.0'
     // RootTools

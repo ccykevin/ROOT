@@ -1,2 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.kevincheng.deviceextensions" />
+    package="com.kevincheng.deviceextensions">
+
+    <application>
+        <provider
+            android:name=".internal.DeviceExtensionsInstaller"
+            android:authorities="${applicationId}.device-extensions-installer"
+            android:exported="false" />
+    </application>
+
+</manifest>
