@@ -51,7 +51,7 @@ class Device(private val applicationContext: Context) {
             }
         }
 
-        fun reboot(): Boolean {
+        fun restart(): Boolean {
             if (isRooted) RootTools.restartAndroid()
             return isRooted
         }
