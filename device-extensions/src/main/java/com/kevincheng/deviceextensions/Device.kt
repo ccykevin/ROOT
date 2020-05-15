@@ -41,9 +41,9 @@ class Device(private val applicationContext: Context) {
             get() = RootTools.isRootAvailable()
 
         val isRootAccessGiven: Boolean
-            get() = RootTools.isAccessGiven(0, Int.MAX_VALUE)
+            get() = RootTools.isAccessGiven()
 
-        fun isRootAccessGiven(timeout: Int = 0, retries: Int = 3): Boolean {
+        fun isRootAccessGiven(timeout: Int, retries: Int): Boolean {
             return try {
                 RootTools.isAccessGiven(timeout, retries)
             } catch (e: TimeoutException) {
