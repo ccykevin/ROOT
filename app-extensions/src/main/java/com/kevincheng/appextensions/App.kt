@@ -25,6 +25,7 @@ import com.orhanobut.logger.Logger
 import java.io.File
 import java.lang.ref.WeakReference
 import java.security.MessageDigest
+import java.util.Calendar
 import kotlin.system.exitProcess
 
 class App(private val applicationContext: Context) : Application.ActivityLifecycleCallbacks {
@@ -84,6 +85,14 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
             )
             scheduleRestartChecker()
             exitProcess(0)
+        }
+
+        fun scheduleRestart(time: Calendar) {
+            val intent = Intent("${context.packageName}.APP_EXTENSIONS_SCHEDULE_RESTART")
+            val pendingIntent =
+                PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            alarmManager.setAlarm(AlarmManager.RTC_WAKEUP, time.timeInMillis, pendingIntent)
         }
 
         fun update(apk: File) {
