@@ -1,12 +1,17 @@
 package com.kevincheng.deviceextensions
 
 import android.annotation.SuppressLint
+import android.app.AlarmManager
 import android.app.Application
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.preference.PreferenceManager
 import android.provider.Settings
 import androidx.core.content.edit
+import com.kevincheng.extensions.setAlarm
 import com.stericson.RootTools.RootTools
+import java.util.Calendar
 import java.util.concurrent.TimeoutException
 
 class Device(private val applicationContext: Context) {
@@ -54,6 +59,14 @@ class Device(private val applicationContext: Context) {
         fun restart(): Boolean {
             if (isRooted) RootTools.restartAndroid()
             return isRooted
+        }
+
+        fun scheduleRestart(time: Calendar) {
+            val intent = Intent("${shared.applicationContext.packageName}.DEVICE_EXTENSIONS_SCHEDULE_RESTART")
+            val pendingIntent =
+                PendingIntent.getBroadcast(shared.applicationContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            val alarmManager = shared.applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            alarmManager.setAlarm(AlarmManager.RTC_WAKEUP, time.timeInMillis, pendingIntent)
         }
     }
 }

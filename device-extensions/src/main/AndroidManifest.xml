@@ -6,6 +6,12 @@
             android:name=".internal.DeviceExtensionsInstaller"
             android:authorities="${applicationId}.device-extensions-installer"
             android:exported="false" />
+
+        <receiver android:name=".internal.ScheduleRestartReceiver">
+            <intent-filter>
+                <action android:name="${applicationId}.DEVICE_EXTENSIONS_SCHEDULE_RESTART" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
