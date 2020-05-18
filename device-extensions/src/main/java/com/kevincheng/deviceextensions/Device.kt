@@ -24,13 +24,20 @@ class Device(private val applicationContext: Context) {
             }
         }
 
+        private val context: Context get() = shared.applicationContext
+        private val scheduleRestartIntent: PendingIntent
+            get() {
+                val intent = Intent("${context.packageName}.DEVICE_EXTENSIONS_SCHEDULE_RESTART")
+                return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            }
+
         val androidId: String
             @SuppressLint("HardwareIds")
-            get() = Settings.Secure.getString(shared.applicationContext.contentResolver, Settings.Secure.ANDROID_ID)
+            get() = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
 
         val UUID: String
             get() {
-                val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(shared.applicationContext)
+                val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
                 val key = shared.applicationContext.getString(R.string.pref_deviceextensions_uuid_key)
                 var uuid = sharedPreferences.getString(key, null)
                 if (uuid == null) {
@@ -62,11 +69,13 @@ class Device(private val applicationContext: Context) {
         }
 
         fun scheduleRestart(time: Calendar) {
-            val intent = Intent("${shared.applicationContext.packageName}.DEVICE_EXTENSIONS_SCHEDULE_RESTART")
-            val pendingIntent =
-                PendingIntent.getBroadcast(shared.applicationContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-            val alarmManager = shared.applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            alarmManager.setAlarm(AlarmManager.RTC_WAKEUP, time.timeInMillis, pendingIntent)
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            alarmManager.setAlarm(AlarmManager.RTC_WAKEUP, time.timeInMillis, scheduleRestartIntent)
+        }
+
+        fun cancelScheduledRestart() {
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            alarmManager.cancel(scheduleRestartIntent.apply { cancel() })
         }
     }
 }
