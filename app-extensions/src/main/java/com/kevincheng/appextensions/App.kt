@@ -41,6 +41,12 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
             }
         }
 
+        private val scheduleRestartIntent: PendingIntent
+            get() {
+                val intent = Intent("${context.packageName}.APP_EXTENSIONS_SCHEDULE_RESTART")
+                return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            }
+
         val context: Context get() = shared.applicationContext
         val currentActivity: Activity? get() = shared.currentActivityWeakReference?.get()
         val launchIntent: Intent? get() = context.launchIntent
@@ -88,11 +94,14 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
         }
 
         fun scheduleRestart(time: Calendar) {
-            val intent = Intent("${context.packageName}.APP_EXTENSIONS_SCHEDULE_RESTART")
-            val pendingIntent =
-                PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            alarmManager.setAlarm(AlarmManager.RTC_WAKEUP, time.timeInMillis, pendingIntent)
+            alarmManager.setAlarm(AlarmManager.RTC_WAKEUP, time.timeInMillis, scheduleRestartIntent)
+        }
+
+        fun cancelScheduledRestart() {
+            val intent = scheduleRestartIntent.apply { cancel() }
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            alarmManager.cancel(intent)
         }
 
         fun update(apk: File) {
