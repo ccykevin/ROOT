@@ -22,5 +22,11 @@
                 <action android:name="${applicationId}.APP_EXTENSIONS_RESTART_CHECKING" />
             </intent-filter>
         </receiver>
+
+        <receiver android:name=".internal.ScheduleRestartReceiver">
+            <intent-filter>
+                <action android:name="${applicationId}.APP_EXTENSIONS_SCHEDULE_RESTART" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>
