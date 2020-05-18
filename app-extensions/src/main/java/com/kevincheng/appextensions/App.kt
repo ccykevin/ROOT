@@ -47,11 +47,27 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
                 return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
             }
 
-        val context: Context get() = shared.applicationContext
-        val currentActivity: Activity? get() = shared.currentActivityWeakReference?.get()
-        val launchIntent: Intent? get() = context.launchIntent
-        val requiredPermissions: Array<String> get() = context.requiredPermissions
-        val isGrantedRequiredPermissions: Boolean get() = context.isGrantedRequiredPermissions
+        @JvmStatic
+        val context: Context
+            get() = shared.applicationContext
+
+        @JvmStatic
+        val currentActivity: Activity?
+            get() = shared.currentActivityWeakReference?.get()
+
+        @JvmStatic
+        val launchIntent: Intent?
+            get() = context.launchIntent
+
+        @JvmStatic
+        val requiredPermissions: Array<String>
+            get() = context.requiredPermissions
+
+        @JvmStatic
+        val isGrantedRequiredPermissions: Boolean
+            get() = context.isGrantedRequiredPermissions
+
+        @JvmStatic
         val signatures: String
             get() = when {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.P -> {
@@ -71,6 +87,7 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
                 MessageDigest.getInstance("SHA").apply { update(it.toByteArray()) }.digest().toHex
             }
 
+        @JvmStatic
         fun relaunch() {
             launchIntent?.apply {
                 flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
@@ -80,6 +97,7 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
             }
         }
 
+        @JvmStatic
         fun restart() {
             currentActivity?.finishAffinity()
             val pendingIntent = PendingIntent.getActivity(context, 0, launchIntent, PendingIntent.FLAG_ONE_SHOT)
@@ -93,17 +111,20 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
             exitProcess(0)
         }
 
+        @JvmStatic
         fun scheduleRestart(time: Calendar) {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             alarmManager.setAlarm(AlarmManager.RTC_WAKEUP, time.timeInMillis, scheduleRestartIntent)
         }
 
+        @JvmStatic
         fun cancelScheduledRestart() {
             val intent = scheduleRestartIntent.apply { cancel() }
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             alarmManager.cancel(intent)
         }
 
+        @JvmStatic
         fun update(apk: File) {
             when (Shell.SU.available()) {
                 true -> {

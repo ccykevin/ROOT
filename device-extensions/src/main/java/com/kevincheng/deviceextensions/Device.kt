@@ -31,10 +31,12 @@ class Device(private val applicationContext: Context) {
                 return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
             }
 
+        @JvmStatic
         val androidId: String
             @SuppressLint("HardwareIds")
             get() = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
 
+        @JvmStatic
         val UUID: String
             get() {
                 val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
@@ -49,12 +51,15 @@ class Device(private val applicationContext: Context) {
                 return uuid
             }
 
+        @JvmStatic
         val isRooted: Boolean
             get() = RootTools.isRootAvailable()
 
+        @JvmStatic
         val isRootAccessGiven: Boolean
             get() = RootTools.isAccessGiven()
 
+        @JvmStatic
         fun isRootAccessGiven(timeout: Int, retries: Int): Boolean {
             return try {
                 RootTools.isAccessGiven(timeout, retries)
@@ -63,16 +68,19 @@ class Device(private val applicationContext: Context) {
             }
         }
 
+        @JvmStatic
         fun restart(): Boolean {
             if (isRooted) RootTools.restartAndroid()
             return isRooted
         }
 
+        @JvmStatic
         fun scheduleRestart(time: Calendar) {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             alarmManager.setAlarm(AlarmManager.RTC_WAKEUP, time.timeInMillis, scheduleRestartIntent)
         }
 
+        @JvmStatic
         fun cancelScheduledRestart() {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             alarmManager.cancel(scheduleRestartIntent.apply { cancel() })
