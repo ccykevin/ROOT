@@ -13,7 +13,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
-import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
 import com.jaredrummler.android.shell.Shell
 import com.kevincheng.extensions.isGrantedRequiredPermissions
@@ -30,6 +29,9 @@ import kotlin.system.exitProcess
 
 class App(private val applicationContext: Context) : Application.ActivityLifecycleCallbacks {
     companion object {
+        private const val TAG = "APP_EXTENSIONS"
+        const val REQUEST_CODE_INSTALL = 999
+
         private lateinit var shared: App
 
         internal fun install(application: Application) {
@@ -44,7 +46,12 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
         private val scheduleRestartIntent: PendingIntent
             get() {
                 val intent = Intent("${context.packageName}.APP_EXTENSIONS_SCHEDULE_RESTART")
-                return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                return PendingIntent.getBroadcast(
+                    context,
+                    0,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                )
             }
 
         @JvmStatic
@@ -71,13 +78,16 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
         val signatures: String
             get() = when {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.P -> {
-                    context.packageManager.getPackageInfo(context.packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+                    context.packageManager.getPackageInfo(
+                        context.packageName,
+                        PackageManager.GET_SIGNING_CERTIFICATES
+                    )
                         .signingInfo.let {
-                        when {
-                            it.hasMultipleSigners() -> it.apkContentsSigners
-                            else -> it.signingCertificateHistory
+                            when {
+                                it.hasMultipleSigners() -> it.apkContentsSigners
+                                else -> it.signingCertificateHistory
+                            }
                         }
-                    }
                 }
                 else -> context.packageManager.getPackageInfo(
                     context.packageName,
@@ -100,7 +110,8 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
         @JvmStatic
         fun restart() {
             currentActivity?.finishAffinity()
-            val pendingIntent = PendingIntent.getActivity(context, 0, launchIntent, PendingIntent.FLAG_ONE_SHOT)
+            val pendingIntent =
+                PendingIntent.getActivity(context, 0, launchIntent, PendingIntent.FLAG_ONE_SHOT)
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             alarmManager.setAlarm(
                 AlarmManager.ELAPSED_REALTIME_WAKEUP,
@@ -131,15 +142,16 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
                     val launcherComponent = launchIntent?.component?.flattenToString()
                     val restartCommand = launcherComponent?.let { "am start -n $launcherComponent" }
                         ?: "monkey -p ${context.packageName} -c android.intent.category.LAUNCHER 1"
+                    Logger.t(TAG).d("Trying to install update silently")
                     Handler(Looper.getMainLooper()).post {
                         scheduleRestartChecker()
-                        val result = Shell.SU.run("pm install -rdg ${apk.absolutePath}", restartCommand)
-                        Logger.d(
-                            "${when (result.isSuccessful) {
-                                true -> "update successfully"
-                                false -> "update unsuccessfully"
-                            }
-                            } -> ${when (result.isSuccessful) {
+                        val result =
+                            Shell.SU.run("pm install -r -d ${apk.absolutePath}", restartCommand)
+                        Logger.t(TAG).d(
+                            "Install ${when (result.isSuccessful) {
+                                true -> "succeeded"
+                                false -> "failed"
+                            }} -> ${when (result.isSuccessful) {
                                 true -> result.stdout
                                 false -> result.stderr
                             }}"
@@ -147,25 +159,40 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
                     }
                 }
                 else -> {
-                    val fileUri = when {
-                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> FileProvider.getUriForFile(
-                            context,
-                            context.packageName,
-                            apk
-                        )
-                        else -> Uri.fromFile(apk)
+                    val intent = Intent(Intent.ACTION_INSTALL_PACKAGE).also {
+                        it.data = getUriForFile(apk)
+                        it.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
+                        it.putExtra(Intent.EXTRA_RETURN_RESULT, true)
+                        it.putExtra(Intent.EXTRA_INSTALLER_PACKAGE_NAME, context.packageName)
                     }
-                    val mimeType = apk.let {
-                        MimeTypeMap.getSingleton()
-                            .getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(it.absolutePath))
+                    when {
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> intent.also {
+                            it.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        }
                     }
-                    val intent = Intent(Intent.ACTION_VIEW, fileUri)
-                    intent.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
-                    intent.setDataAndType(fileUri, mimeType)
-                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    context.startActivity(intent)
+                    val activity = currentActivity
+                    when {
+                        activity != null -> {
+                            activity.startActivityForResult(intent, REQUEST_CODE_INSTALL)
+                            Logger.t(TAG)
+                                .d("${activity.javaClass.simpleName} start PackageInstallerActivity for result")
+                        }
+                        else -> {
+                            context.startActivity(intent.also {
+                                it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                            })
+                            Logger.t(TAG).d("Start PackageInstallerActivity")
+                        }
+                    }
                 }
+            }
+        }
+
+        @JvmStatic
+        fun getUriForFile(file: File): Uri {
+            return when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> FileProvider.getUriForFile(context, context.packageName, file)
+                else -> Uri.fromFile(file)
             }
         }
 
