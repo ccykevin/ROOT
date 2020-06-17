@@ -160,16 +160,15 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
                 }
                 else -> {
                     val intent = Intent(Intent.ACTION_INSTALL_PACKAGE).also {
+                        it.data = getUriForFile(apk)
                         it.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
                         it.putExtra(Intent.EXTRA_RETURN_RESULT, true)
                         it.putExtra(Intent.EXTRA_INSTALLER_PACKAGE_NAME, context.packageName)
                     }
                     when {
                         Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> intent.also {
-                            it.data = FileProvider.getUriForFile(context, context.packageName, apk)
                             it.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
                         }
-                        else -> intent.also { it.data = Uri.fromFile(apk) }
                     }
                     val activity = currentActivity
                     when {
@@ -186,6 +185,14 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
                         }
                     }
                 }
+            }
+        }
+
+        @JvmStatic
+        fun getUriForFile(file: File): Uri {
+            return when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> FileProvider.getUriForFile(context, context.packageName, file)
+                else -> Uri.fromFile(file)
             }
         }
 
