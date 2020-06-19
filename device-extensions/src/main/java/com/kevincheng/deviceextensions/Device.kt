@@ -6,6 +6,7 @@ import android.app.Application
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.preference.PreferenceManager
 import android.provider.Settings
 import android.util.DisplayMetrics
@@ -87,6 +88,22 @@ class Device(private val applicationContext: Context) {
         @JvmStatic
         val scaledDensity: Float
             get() = displayMetrics.scaledDensity
+
+        @JvmStatic
+        val isPortrait: Boolean
+            get() = shared
+                .applicationContext
+                .resources
+                .configuration
+                .orientation == Configuration.ORIENTATION_PORTRAIT
+
+        @JvmStatic
+        val isLandscape: Boolean
+            get() = shared
+                .applicationContext
+                .resources
+                .configuration
+                .orientation == Configuration.ORIENTATION_LANDSCAPE
 
         @JvmStatic
         val isRooted: Boolean
