@@ -24,9 +24,9 @@ import com.kevincheng.extensions.setAlarm
 import com.kevincheng.extensions.toHex
 import com.orhanobut.logger.Logger
 import java.io.File
-import java.lang.ref.WeakReference
 import java.security.MessageDigest
 import java.util.Calendar
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.system.exitProcess
 
 class App(private val applicationContext: Context) : Application.ActivityLifecycleCallbacks {
@@ -62,7 +62,10 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
 
         @JvmStatic
         val currentActivity: Activity?
-            get() = shared.currentActivityWeakReference?.get()
+            get() = when (shared.aliveActivities.isNotEmpty()) {
+                true -> shared.aliveActivities.last()
+                false -> null
+            }
 
         @JvmStatic
         val launchIntent: Intent?
@@ -132,14 +135,14 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
             launchIntent?.apply {
                 flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
                 val activity = currentActivity ?: return
-                activity.finishAffinity()
+                finishAllActivities()
                 activity.startActivity(this)
             }
         }
 
         @JvmStatic
         fun restart() {
-            currentActivity?.finishAffinity()
+            finishAllActivities()
             val pendingIntent =
                 PendingIntent.getActivity(context, 0, launchIntent, PendingIntent.FLAG_ONE_SHOT)
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -150,6 +153,11 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
             )
             scheduleRestartChecker()
             exitProcess(0)
+        }
+
+        @JvmStatic
+        fun finishAllActivities() {
+            shared.aliveActivities.forEach { it.finishAffinity() }
         }
 
         @JvmStatic
@@ -243,29 +251,28 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
         }
     }
 
-    private var currentActivityWeakReference: WeakReference<Activity>? = null
+    private val aliveActivities = CopyOnWriteArrayList<Activity>()
 
-    override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {
-        activity?.apply {
-            currentActivityWeakReference = WeakReference(this)
-        }
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+        aliveActivities.add(activity)
     }
 
-    override fun onActivityStarted(activity: Activity?) {
+    override fun onActivityStarted(activity: Activity) {
     }
 
-    override fun onActivityResumed(activity: Activity?) {
+    override fun onActivityResumed(activity: Activity) {
     }
 
-    override fun onActivityPaused(activity: Activity?) {
+    override fun onActivityPaused(activity: Activity) {
     }
 
-    override fun onActivityStopped(activity: Activity?) {
+    override fun onActivityStopped(activity: Activity) {
     }
 
-    override fun onActivityDestroyed(activity: Activity?) {
+    override fun onActivityDestroyed(activity: Activity) {
+        aliveActivities.takeIf { it.contains(activity) }?.also { it.remove(activity) }
     }
 
-    override fun onActivitySaveInstanceState(activity: Activity?, outState: Bundle?) {
+    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle?) {
     }
 }
