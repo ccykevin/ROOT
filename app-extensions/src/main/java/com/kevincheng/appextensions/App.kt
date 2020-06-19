@@ -13,6 +13,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.util.DisplayMetrics
+import android.view.WindowManager
 import androidx.core.content.FileProvider
 import com.jaredrummler.android.shell.Shell
 import com.kevincheng.extensions.isGrantedRequiredPermissions
@@ -73,6 +75,34 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
         @JvmStatic
         val isGrantedRequiredPermissions: Boolean
             get() = context.isGrantedRequiredPermissions
+
+        @JvmStatic
+        val displayMetrics: DisplayMetrics
+            get() = DisplayMetrics().also {
+                (shared.applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager)
+                    .defaultDisplay
+                    .getMetrics(it)
+            }
+
+        @JvmStatic
+        val screenWidth: Int
+            get() = displayMetrics.widthPixels
+
+        @JvmStatic
+        val screenHeight: Int
+            get() = displayMetrics.heightPixels
+
+        @JvmStatic
+        val densityDpi: Int
+            get() = displayMetrics.densityDpi
+
+        @JvmStatic
+        val density: Float
+            get() = displayMetrics.density
+
+        @JvmStatic
+        val scaledDensity: Float
+            get() = displayMetrics.scaledDensity
 
         @JvmStatic
         val signatures: String
@@ -191,7 +221,11 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
         @JvmStatic
         fun getUriForFile(file: File): Uri {
             return when {
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> FileProvider.getUriForFile(context, context.packageName, file)
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> FileProvider.getUriForFile(
+                    context,
+                    context.packageName,
+                    file
+                )
                 else -> Uri.fromFile(file)
             }
         }
