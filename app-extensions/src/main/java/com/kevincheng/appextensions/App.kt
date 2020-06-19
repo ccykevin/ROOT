@@ -13,6 +13,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.util.DisplayMetrics
+import android.view.WindowManager
 import androidx.core.content.FileProvider
 import com.jaredrummler.android.shell.Shell
 import com.kevincheng.extensions.isGrantedRequiredPermissions
@@ -22,9 +24,9 @@ import com.kevincheng.extensions.setAlarm
 import com.kevincheng.extensions.toHex
 import com.orhanobut.logger.Logger
 import java.io.File
-import java.lang.ref.WeakReference
 import java.security.MessageDigest
 import java.util.Calendar
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.system.exitProcess
 
 class App(private val applicationContext: Context) : Application.ActivityLifecycleCallbacks {
@@ -60,7 +62,10 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
 
         @JvmStatic
         val currentActivity: Activity?
-            get() = shared.currentActivityWeakReference?.get()
+            get() = when (shared.aliveActivities.isNotEmpty()) {
+                true -> shared.aliveActivities.last()
+                false -> null
+            }
 
         @JvmStatic
         val launchIntent: Intent?
@@ -73,6 +78,34 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
         @JvmStatic
         val isGrantedRequiredPermissions: Boolean
             get() = context.isGrantedRequiredPermissions
+
+        @JvmStatic
+        val displayMetrics: DisplayMetrics
+            get() = DisplayMetrics().also {
+                (shared.applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager)
+                    .defaultDisplay
+                    .getMetrics(it)
+            }
+
+        @JvmStatic
+        val screenWidth: Int
+            get() = displayMetrics.widthPixels
+
+        @JvmStatic
+        val screenHeight: Int
+            get() = displayMetrics.heightPixels
+
+        @JvmStatic
+        val densityDpi: Int
+            get() = displayMetrics.densityDpi
+
+        @JvmStatic
+        val density: Float
+            get() = displayMetrics.density
+
+        @JvmStatic
+        val scaledDensity: Float
+            get() = displayMetrics.scaledDensity
 
         @JvmStatic
         val signatures: String
@@ -102,14 +135,14 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
             launchIntent?.apply {
                 flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
                 val activity = currentActivity ?: return
-                activity.finishAffinity()
+                finishAllActivities()
                 activity.startActivity(this)
             }
         }
 
         @JvmStatic
         fun restart() {
-            currentActivity?.finishAffinity()
+            finishAllActivities()
             val pendingIntent =
                 PendingIntent.getActivity(context, 0, launchIntent, PendingIntent.FLAG_ONE_SHOT)
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -120,6 +153,11 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
             )
             scheduleRestartChecker()
             exitProcess(0)
+        }
+
+        @JvmStatic
+        fun finishAllActivities() {
+            shared.aliveActivities.forEach { it.finishAffinity() }
         }
 
         @JvmStatic
@@ -191,7 +229,11 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
         @JvmStatic
         fun getUriForFile(file: File): Uri {
             return when {
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> FileProvider.getUriForFile(context, context.packageName, file)
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> FileProvider.getUriForFile(
+                    context,
+                    context.packageName,
+                    file
+                )
                 else -> Uri.fromFile(file)
             }
         }
@@ -209,29 +251,28 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
         }
     }
 
-    private var currentActivityWeakReference: WeakReference<Activity>? = null
+    private val aliveActivities = CopyOnWriteArrayList<Activity>()
 
-    override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {
-        activity?.apply {
-            currentActivityWeakReference = WeakReference(this)
-        }
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+        aliveActivities.add(activity)
     }
 
-    override fun onActivityStarted(activity: Activity?) {
+    override fun onActivityStarted(activity: Activity) {
     }
 
-    override fun onActivityResumed(activity: Activity?) {
+    override fun onActivityResumed(activity: Activity) {
     }
 
-    override fun onActivityPaused(activity: Activity?) {
+    override fun onActivityPaused(activity: Activity) {
     }
 
-    override fun onActivityStopped(activity: Activity?) {
+    override fun onActivityStopped(activity: Activity) {
     }
 
-    override fun onActivityDestroyed(activity: Activity?) {
+    override fun onActivityDestroyed(activity: Activity) {
+        aliveActivities.takeIf { it.contains(activity) }?.also { it.remove(activity) }
     }
 
-    override fun onActivitySaveInstanceState(activity: Activity?, outState: Bundle?) {
+    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle?) {
     }
 }

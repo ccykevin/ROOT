@@ -6,8 +6,11 @@ import android.app.Application
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.preference.PreferenceManager
 import android.provider.Settings
+import android.util.DisplayMetrics
+import android.view.WindowManager
 import androidx.core.content.edit
 import com.kevincheng.extensions.setAlarm
 import com.stericson.RootTools.RootTools
@@ -28,7 +31,12 @@ class Device(private val applicationContext: Context) {
         private val scheduleRestartIntent: PendingIntent
             get() {
                 val intent = Intent("${context.packageName}.DEVICE_EXTENSIONS_SCHEDULE_RESTART")
-                return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                return PendingIntent.getBroadcast(
+                    context,
+                    0,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                )
             }
 
         @JvmStatic
@@ -40,7 +48,9 @@ class Device(private val applicationContext: Context) {
         val UUID: String
             get() {
                 val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-                val key = shared.applicationContext.getString(R.string.pref_deviceextensions_uuid_key)
+                val key = shared
+                    .applicationContext
+                    .getString(R.string.pref_deviceextensions_uuid_key)
                 var uuid = sharedPreferences.getString(key, null)
                 if (uuid == null) {
                     uuid = java.util.UUID.randomUUID().toString()
@@ -50,6 +60,50 @@ class Device(private val applicationContext: Context) {
                 }
                 return uuid
             }
+
+        @JvmStatic
+        val displayMetrics: DisplayMetrics
+            get() = DisplayMetrics().also {
+                (shared.applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager)
+                    .defaultDisplay
+                    .getRealMetrics(it)
+            }
+
+        @JvmStatic
+        val screenWidth: Int
+            get() = displayMetrics.widthPixels
+
+        @JvmStatic
+        val screenHeight: Int
+            get() = displayMetrics.heightPixels
+
+        @JvmStatic
+        val densityDpi: Int
+            get() = displayMetrics.densityDpi
+
+        @JvmStatic
+        val density: Float
+            get() = displayMetrics.density
+
+        @JvmStatic
+        val scaledDensity: Float
+            get() = displayMetrics.scaledDensity
+
+        @JvmStatic
+        val isPortrait: Boolean
+            get() = shared
+                .applicationContext
+                .resources
+                .configuration
+                .orientation == Configuration.ORIENTATION_PORTRAIT
+
+        @JvmStatic
+        val isLandscape: Boolean
+            get() = shared
+                .applicationContext
+                .resources
+                .configuration
+                .orientation == Configuration.ORIENTATION_LANDSCAPE
 
         @JvmStatic
         val isRooted: Boolean
