@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="rc_radius" format="dimension" />
+
+    <declare-styleable name="RoundedConstraintLayout">
+        <attr name="rc_radius" />
+    </declare-styleable>
+
+    <declare-styleable name="RoundedFrameLayout">
+        <attr name="rc_radius" />
+    </declare-styleable>
+
+    <declare-styleable name="RoundedLinearLayout">
+        <attr name="rc_radius" />
+    </declare-styleable>
+
+    <declare-styleable name="RoundedRelativeLayout">
+        <attr name="rc_radius" />
+    </declare-styleable>
+</resources>
