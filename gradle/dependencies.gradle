@@ -15,8 +15,11 @@
  */
 
 def versions = [
-        androidx: [
+        ktxCoroutines: "1.3.0-M2",
+        androidx     : [
                 appcompat       : "1.1.0",
+                annotations     : "1.1.0",
+                coreKtx         : "1.1.0",
                 constraintLayout: "2.0.0-beta4",
                 recyclerView    : "1.2.0-alpha03"
         ]
@@ -29,12 +32,16 @@ def build = [
 def apt = []
 
 def androidx = [
+        coreKtx         : "androidx.core:core-ktx:${versions.androidx.coreKtx}",
         appcompat       : "androidx.appcompat:appcompat:${versions.androidx.appcompat}",
         constraintLayout: "androidx.constraintlayout:constraintlayout:${versions.androidx.constraintLayout}",
         recyclerView    : "androidx.recyclerview:recyclerview:${versions.androidx.recyclerView}"
 ]
 
-def external = []
+def external = [
+        ktxCoroutinesCore   : "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.ktxCoroutines}",
+        ktxCoroutinesAndroid: "org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.ktxCoroutines}"
+]
 
 ext.deps = [
         "versions": versions,
