@@ -1,0 +1,45 @@
+/*
+ * Copyright (C) 2017. Uber Technologies
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+def versions = [
+        androidx: [
+                appcompat       : "1.1.0",
+                constraintLayout: "2.0.0-beta4",
+                recyclerView    : "1.2.0-alpha03"
+        ]
+]
+
+def build = [
+        javaVersion: JavaVersion.VERSION_1_8
+]
+
+def apt = []
+
+def androidx = [
+        appcompat       : "androidx.appcompat:appcompat:${versions.androidx.appcompat}",
+        constraintLayout: "androidx.constraintlayout:constraintlayout:${versions.androidx.constraintLayout}",
+        recyclerView    : "androidx.recyclerview:recyclerview:${versions.androidx.recyclerView}"
+]
+
+def external = []
+
+ext.deps = [
+        "versions": versions,
+        "build"   : build,
+        "apt"     : apt,
+        "androidx": androidx,
+        "external": external
+]

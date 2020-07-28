@@ -36,4 +36,5 @@ dependencies {
     implementation project(path: ':extensions')
     implementation project(path: ':app-extensions')
     implementation project(path: ':device-extensions')
+    implementation project(path: ':widget')
 }
