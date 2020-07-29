@@ -27,9 +27,9 @@ android {
 }
 
 dependencies {
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation project(path: ':extensions')
-    implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.0.2'
+    implementation deps.androidx.coreKtx
     implementation 'com.jaredrummler:android-shell:1.0.0'
     implementation('com.github.Stericson:RootTools:5.0') { transitive = false }
     implementation 'com.github.Stericson:RootShell:1.6'

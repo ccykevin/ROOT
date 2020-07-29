@@ -26,11 +26,9 @@ android {
     }
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    api 'com.orhanobut:logger:2.2.0'
+    compileOnly deps.androidx.appcompat
+    compileOnly deps.androidx.constraintLayout
 }
