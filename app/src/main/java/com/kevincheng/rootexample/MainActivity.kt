@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity() {
         Logger.d("Is Granted Required Permissions? $isGrantedRequiredPermissions")
         Logger.d(Device.androidId)
         Logger.d(Device.isRooted)
-        Logger.d("Device.isPortrait@${Device.isPortrait} Device.isLandscape@${Device.isLandscape} Device.screenWidth@${Device.screenWidth} Device.screenHeight@${Device.screenHeight} Device.densityDpi@${Device.densityDpi} Device.density@${Device.density} Device.scaledDensity@${Device.scaledDensity}")
-        Logger.d("App.screenWidth@${App.screenWidth} App.screenHeight@${App.screenHeight} App.densityDpi@${App.densityDpi} App.density@${App.density} App.scaledDensity@${App.scaledDensity}")
+        Logger.d("Device.isPortrait@${Device.isPortrait} Device.isLandscape@${Device.isLandscape} Device.screenWidth@${Device.screenWidth} Device.screenHeight@${Device.screenHeight} Device.densityDpi@${Device.densityDpi} Device.density@${Device.density} Device.scaledDensity@${Device.scaledDensity} Device.smallestWidth@${Device.smallestWidth}")
+        Logger.d("App.screenWidth@${App.screenWidth} App.screenHeight@${App.screenHeight} App.densityDpi@${App.densityDpi} App.density@${App.density} App.scaledDensity@${App.scaledDensity} App.smallestWidth@${App.smallestWidth}")
     }
 }

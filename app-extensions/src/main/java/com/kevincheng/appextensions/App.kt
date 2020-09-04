@@ -108,6 +108,16 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
             get() = displayMetrics.scaledDensity
 
         @JvmStatic
+        val smallestWidth: Float
+            get() {
+                val smallestWidth = when {
+                    screenWidth < screenHeight -> screenWidth
+                    else -> screenHeight
+                }
+                return smallestWidth / density
+            }
+
+        @JvmStatic
         val signatures: String
             get() = when {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.P -> {

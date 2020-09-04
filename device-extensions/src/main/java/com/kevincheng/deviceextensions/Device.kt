@@ -106,6 +106,16 @@ class Device(private val applicationContext: Context) {
                 .orientation == Configuration.ORIENTATION_LANDSCAPE
 
         @JvmStatic
+        val smallestWidth: Float
+            get() {
+                val smallestWidth = when {
+                    screenWidth < screenHeight -> screenWidth
+                    else -> screenHeight
+                }
+                return smallestWidth / density
+            }
+
+        @JvmStatic
         val isRooted: Boolean
             get() = RootTools.isRootAvailable()
 

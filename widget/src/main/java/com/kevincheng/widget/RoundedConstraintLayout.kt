@@ -35,6 +35,12 @@ open class RoundedConstraintLayout @JvmOverloads constructor(
         clipViewStrategy.afterDispatchDraw(canvas)
     }
 
+    override fun draw(canvas: Canvas) {
+        clipViewStrategy.beforeDispatchDraw(canvas)
+        super.draw(canvas)
+        clipViewStrategy.afterDispatchDraw(canvas)
+    }
+
     override fun setCornerRadius(cornerRadius: Float) {
         clipViewStrategy.setCornerRadius(cornerRadius)
         invalidate()
