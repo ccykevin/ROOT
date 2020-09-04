@@ -1,5 +1,6 @@
 package com.kevincheng.extensions
 
+import android.Manifest
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Context.ACTIVITY_SERVICE
@@ -24,9 +25,15 @@ inline val Context.requiredPermissions: Array<String>
 
 inline val Context.isGrantedRequiredPermissions: Boolean
     get() = when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> requiredPermissions.map {
-            ContextCompat.checkSelfPermission(this, it)
-        }.none { it != PackageManager.PERMISSION_GRANTED }
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> {
+            val requiredPermissions = requiredPermissions.toMutableList()
+            if (requiredPermissions.contains(Manifest.permission.FOREGROUND_SERVICE) && Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+                requiredPermissions.remove(Manifest.permission.FOREGROUND_SERVICE)
+            }
+            requiredPermissions.map {
+                ContextCompat.checkSelfPermission(this, it)
+            }.none { it != PackageManager.PERMISSION_GRANTED }
+        }
         else -> true
     }
 
