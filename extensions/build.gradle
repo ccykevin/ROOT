@@ -35,4 +35,5 @@ dependencies {
     compileOnly deps.androidx.recyclerView
     compileOnly deps.external.ktxCoroutinesCore
     compileOnly deps.external.ktxCoroutinesAndroid
+    compileOnly deps.androidx.constraintLayout
 }
