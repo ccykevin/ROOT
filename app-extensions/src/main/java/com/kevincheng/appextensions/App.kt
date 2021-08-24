@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.provider.Settings
 import android.util.DisplayMetrics
 import android.view.WindowManager
 import androidx.core.content.FileProvider
@@ -141,6 +142,23 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
             }
 
         @JvmStatic
+        val canDrawOverlays: Boolean
+            get() = when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(context) -> false
+                else -> true
+            }
+
+        @JvmStatic
+        val canRequestPackageInstalls: Boolean
+            get() = when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && context.packageManager.canRequestPackageInstalls() -> true
+                else -> when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    true -> false
+                    false -> true
+                }
+            }
+
+        @JvmStatic
         fun relaunch() {
             launchIntent?.apply {
                 flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
@@ -245,6 +263,40 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
                     file
                 )
                 else -> Uri.fromFile(file)
+            }
+        }
+
+        @JvmStatic
+        fun grantDrawOverlaysPermission() {
+            val intent = when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.fromParts("package", context.packageName, null)
+                ).also {
+                    it.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                else -> null
+            }
+            intent?.run {
+                context.startActivity(this)
+                finishAllActivities()
+            }
+        }
+
+        @JvmStatic
+        fun grantRequestPackageInstallsPermission() {
+            val intent = when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> Intent(
+                    Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                    Uri.fromParts("package", context.packageName, null)
+                ).also {
+                    it.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                else -> null
+            }
+            intent?.run {
+                context.startActivity(this)
+                finishAllActivities()
             }
         }
 
