@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="TextClock">
+        <attr name="tc_font" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="RadioGroup">
+        <attr name="rg_checkedButton" format="reference" />
+        <attr name="rg_cornerRadius" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="RadioButton">
+        <attr name="rb_value" format="string|reference" />
+    </declare-styleable>
+
+    <declare-styleable name="StatefulTintColorImageView">
+        <attr name="stciv_tint" format="reference|color" />
+    </declare-styleable>
+</resources>

@@ -8,7 +8,7 @@ apply plugin: 'com.github.dcendents.android-maven'
 
 apply from: "$rootDir/ktlint.gradle"
 
-group='com.github.ccykevin.ROOT'
+group = 'com.github.ccykevin.ROOT'
 
 android {
     compileSdkVersion 28
@@ -31,4 +31,5 @@ dependencies {
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     compileOnly deps.androidx.appcompat
     compileOnly deps.androidx.constraintLayout
+    compileOnly deps.external.flexboxLayout
 }

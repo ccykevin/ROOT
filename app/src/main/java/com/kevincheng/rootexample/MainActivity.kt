@@ -8,7 +8,10 @@ import com.kevincheng.appextensions.App
 import com.kevincheng.deviceextensions.Device
 import com.kevincheng.extensions.isGrantedRequiredPermissions
 import com.kevincheng.extensions.requiredPermissions
+import com.kevincheng.widget.IRadioButton
+import com.kevincheng.widget.IRadioGroup
 import com.orhanobut.logger.Logger
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -22,6 +25,12 @@ class MainActivity : AppCompatActivity() {
         Logger.d(Device.isRooted)
         Logger.d("Device.isPortrait@${Device.isPortrait} Device.isLandscape@${Device.isLandscape} Device.screenWidth@${Device.screenWidth} Device.screenHeight@${Device.screenHeight} Device.densityDpi@${Device.densityDpi} Device.density@${Device.density} Device.scaledDensity@${Device.scaledDensity} Device.smallestWidth@${Device.smallestWidth}")
         Logger.d("App.screenWidth@${App.screenWidth} App.screenHeight@${App.screenHeight} App.densityDpi@${App.densityDpi} App.density@${App.density} App.scaledDensity@${App.scaledDensity} App.smallestWidth@${App.smallestWidth}")
+
+        rg.listener = object : IRadioGroup.Listener {
+            override fun onCheckedChanged(radioGroup: IRadioGroup, checkedButton: IRadioButton?) {
+                Logger.d(checkedButton?.value)
+            }
+        }
     }
 
     override fun onResume() {
