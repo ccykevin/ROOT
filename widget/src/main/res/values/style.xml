@@ -12,4 +12,8 @@
     <declare-styleable name="RadioButton">
         <attr name="rb_value" format="string|reference" />
     </declare-styleable>
+
+    <declare-styleable name="StatefulTintColorImageView">
+        <attr name="stciv_tint" format="reference|color" />
+    </declare-styleable>
 </resources>
