@@ -34,16 +34,10 @@ class ScreenStack(
 
     override fun pushScreen(viewProvider: ViewProvider, shouldAnimate: Boolean) {
         if (viewProvider !is ViewProviderExtended) throw IllegalStateException("viewProvider must be the class of ViewProviderExtended")
-        when (singleView) {
-            true -> onCurrentViewRemoved()
-            false -> onCurrentViewHidden()
-        }
-        removeCurrentView()
+        removeView()
         backStack.push(viewProvider)
         sizeRelay.accept(backStack.size)
-        buildCurrentView()
-        onCurrentViewAppeared()
-        addCurrentView()
+        addView(viewProvider)
     }
 
     override fun popScreen() {
@@ -53,13 +47,10 @@ class ScreenStack(
     override fun popScreen(shouldAnimate: Boolean) {
         if (backStack.isEmpty()) return
         backStack.pop().also {
-            onCurrentViewRemoved(it)
-            removeCurrentView(it)
+            removeView(it)
         }
         sizeRelay.accept(backStack.size)
-        buildCurrentView()
-        onCurrentViewAppeared()
-        addCurrentView()
+        addView()
     }
 
     override fun popBackTo(index: Int, shouldAnimate: Boolean) {
@@ -92,50 +83,46 @@ class ScreenStack(
         return size() - 1
     }
 
-    private fun onCurrentViewHidden() {
-        currentViewProvider?.onViewHidden()
-    }
+    private fun addView(viewProvider: ViewProviderExtended? = null) {
+        val vp = viewProvider ?: currentViewProvider ?: return
 
-    private fun onCurrentViewAppeared() {
-        currentViewProvider?.onViewAppeared()
-    }
+        if (vp.router == null) vp.buildView(parentViewGroup)
 
-    private fun onCurrentViewRemoved(viewProvider: ViewProviderExtended? = null) {
-        val vp = viewProvider ?: currentViewProvider
-        vp?.onViewRemoved()
-    }
+        val view = requireNotNull(vp.router).view
 
-    private fun buildCurrentView() {
-        currentViewProvider?.also {
-            if (it.router == null) it.buildView(parentViewGroup)
-        }
-    }
+        vp.onViewAppeared()
 
-    private fun addCurrentView() {
-        var index = lastViewIndex ?: -1
+        when (parentViewGroup.indexOfChild(view) == -1) {
+            true -> {
+                var index = lastViewIndex ?: -1
 
-        if (!singleView && index != -1) index += 1
+                if (!singleView && index != -1) index += 1
 
-        currentViewProvider?.router?.also {
-            when (parentViewGroup.indexOfChild(it.view) == -1) {
-                true -> parentViewGroup.addView(it.view, index)
-                false -> it.view.visibility = View.VISIBLE
+                parentViewGroup.addView(view, index)
             }
+            false -> view.visibility = View.VISIBLE
         }
     }
 
-    private fun removeCurrentView(viewProvider: ViewProviderExtended? = null) {
+    private fun removeView(viewProvider: ViewProviderExtended? = null) {
         lastViewIndex = null
 
-        val vp = viewProvider ?: currentViewProvider
+        val vp = viewProvider ?: currentViewProvider ?: return
 
-        vp?.router?.also {
-            lastViewIndex = parentViewGroup.indexOfChild(it.view)
+        val view = requireNotNull(vp.router).view
 
-            val pushScreen = viewProvider == null
-            when {
-                pushScreen && !singleView -> it.view.visibility = View.GONE
-                else -> parentViewGroup.removeView(it.view)
+        lastViewIndex = parentViewGroup.indexOfChild(view)
+
+        val pushScreen = viewProvider == null
+
+        when {
+            pushScreen && !singleView -> {
+                vp.onViewHidden()
+                view.visibility = View.GONE
+            }
+            else -> {
+                vp.onViewRemoved()
+                parentViewGroup.removeView(view)
             }
         }
     }
