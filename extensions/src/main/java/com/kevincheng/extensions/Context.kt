@@ -11,6 +11,9 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import android.preference.PreferenceManager
 import android.provider.Settings
+import android.util.TypedValue
+import androidx.annotation.AttrRes
+import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 
 fun Context.isServiceRunning(service: Class<*>): Boolean {
@@ -61,4 +64,14 @@ fun Context.getDrawable(name: String): Drawable? {
     /** if id equal 0 means drawable not found */
     if (id == 0) return null
     return ContextCompat.getDrawable(this, id)
+}
+
+@ColorInt
+fun Context.getColorFromAttr(
+    @AttrRes attrColor: Int,
+    typedValue: TypedValue = TypedValue(),
+    resolveRefs: Boolean = true
+): Int {
+    theme.resolveAttribute(attrColor, typedValue, resolveRefs)
+    return typedValue.data
 }
