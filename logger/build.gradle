@@ -11,10 +11,10 @@ apply from: "$rootDir/ktlint.gradle"
 group='com.github.ccykevin.ROOT'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
     defaultConfig {
         minSdkVersion 17
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
     }
@@ -32,5 +32,6 @@ repositories {
 
 dependencies {
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    compileOnly "com.squareup.okhttp3:okhttp:3.14.9"
     api 'com.orhanobut:logger:2.2.0'
 }
