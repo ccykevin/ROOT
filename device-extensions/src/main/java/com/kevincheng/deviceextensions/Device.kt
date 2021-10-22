@@ -1,21 +1,27 @@
 package com.kevincheng.deviceextensions
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.Application
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.os.Build
 import android.preference.PreferenceManager
 import android.provider.Settings
+import android.telephony.TelephonyManager
 import android.util.DisplayMetrics
 import android.view.WindowManager
+import androidx.core.app.ActivityCompat
 import androidx.core.content.edit
 import com.kevincheng.extensions.setAlarm
 import com.stericson.RootTools.RootTools
 import java.util.Calendar
 import java.util.concurrent.TimeoutException
+import kotlin.text.Typography.tm
 
 class Device(private val applicationContext: Context) {
     companion object {
@@ -42,7 +48,34 @@ class Device(private val applicationContext: Context) {
         @JvmStatic
         val androidId: String
             @SuppressLint("HardwareIds")
-            get() = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+            get() {
+                return when {
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+                        Settings.Secure.getString(
+                            context.contentResolver,
+                            Settings.Secure.ANDROID_ID
+                        )
+                    }
+                    else -> when (ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.READ_PHONE_STATE
+                    ) == PackageManager.PERMISSION_GRANTED) {
+                        true -> {
+                            val tm =
+                                context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+                            when {
+                                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
+                                    tm.imei
+                                }
+                                else -> {
+                                    tm.deviceId
+                                }
+                            }
+                        }
+                        false -> null
+                    }
+                } ?: Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+            }
 
         @JvmStatic
         val UUID: String
