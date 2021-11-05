@@ -2,11 +2,8 @@ package com.kevincheng.deviceextensions
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.AlarmManager
 import android.app.Application
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
@@ -17,11 +14,10 @@ import android.util.DisplayMetrics
 import android.view.WindowManager
 import androidx.core.app.ActivityCompat
 import androidx.core.content.edit
-import com.kevincheng.extensions.setAlarm
+import com.kevincheng.deviceextensions.internal.DeviceKeeper
 import com.stericson.RootTools.RootTools
-import java.util.Calendar
+import org.threeten.bp.LocalDateTime
 import java.util.concurrent.TimeoutException
-import kotlin.text.Typography.tm
 
 class Device(private val applicationContext: Context) {
     companion object {
@@ -34,16 +30,6 @@ class Device(private val applicationContext: Context) {
         }
 
         private val context: Context get() = shared.applicationContext
-        private val scheduleRestartIntent: PendingIntent
-            get() {
-                val intent = Intent("${context.packageName}.DEVICE_EXTENSIONS_SCHEDULE_RESTART")
-                return PendingIntent.getBroadcast(
-                    context,
-                    0,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT
-                )
-            }
 
         @JvmStatic
         val androidId: String
@@ -168,19 +154,18 @@ class Device(private val applicationContext: Context) {
         @JvmStatic
         fun restart(): Boolean {
             if (isRooted) RootTools.restartAndroid()
-            return isRooted
+            return false
         }
 
         @JvmStatic
-        fun scheduleRestart(time: Calendar) {
-            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            alarmManager.setAlarm(AlarmManager.RTC_WAKEUP, time.timeInMillis, scheduleRestartIntent)
+        fun scheduleRestart(time: LocalDateTime) {
+            if (!isRooted) return
+            DeviceKeeper.scheduleRestart(context, time)
         }
 
         @JvmStatic
         fun cancelScheduledRestart() {
-            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            alarmManager.cancel(scheduleRestartIntent.apply { cancel() })
+            DeviceKeeper.cancelScheduledRestart(context)
         }
     }
 }
