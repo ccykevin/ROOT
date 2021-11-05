@@ -24,6 +24,13 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility deps.build.javaVersion
+        targetCompatibility deps.build.javaVersion
+    }
+    kotlinOptions {
+        jvmTarget = deps.build.javaVersion
+    }
 }
 
 repositories {
@@ -34,6 +41,8 @@ dependencies {
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation project(path: ':extensions')
     implementation deps.androidx.coreKtx
+    implementation deps.androidx.workRuntimeKtx
+    api deps.external.threetenabp
     implementation 'com.jaredrummler:android-shell:1.0.0'
     implementation 'com.orhanobut:logger:2.2.0'
 }

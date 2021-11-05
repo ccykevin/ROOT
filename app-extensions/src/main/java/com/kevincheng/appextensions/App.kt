@@ -1,9 +1,7 @@
 package com.kevincheng.appextensions
 
 import android.app.Activity
-import android.app.AlarmManager
 import android.app.Application
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -12,21 +10,26 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.SystemClock
 import android.provider.Settings
 import android.util.DisplayMetrics
 import android.view.WindowManager
 import androidx.core.content.FileProvider
+import com.jakewharton.threetenabp.AndroidThreeTen
 import com.jaredrummler.android.shell.Shell
+import com.kevincheng.appextensions.internal.AppKeeper
 import com.kevincheng.extensions.isGrantedRequiredPermissions
 import com.kevincheng.extensions.launchIntent
 import com.kevincheng.extensions.requiredPermissions
-import com.kevincheng.extensions.setAlarm
 import com.kevincheng.extensions.toHex
 import com.orhanobut.logger.Logger
+import org.threeten.bp.LocalDateTime
+import org.threeten.bp.zone.TzdbZoneRulesProvider
+import org.threeten.bp.zone.ZoneRulesException
+import org.threeten.bp.zone.ZoneRulesProvider
 import java.io.File
+import java.io.IOException
+import java.io.InputStream
 import java.security.MessageDigest
-import java.util.Calendar
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.system.exitProcess
 
@@ -41,21 +44,11 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
             when (::shared.isInitialized) {
                 false -> {
                     shared = App(application.applicationContext)
+                    shared.initThreeTen(application)
                     application.registerActivityLifecycleCallbacks(shared)
                 }
             }
         }
-
-        private val scheduleRestartIntent: PendingIntent
-            get() {
-                val intent = Intent("${context.packageName}.APP_EXTENSIONS_SCHEDULE_RESTART")
-                return PendingIntent.getBroadcast(
-                    context,
-                    0,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT
-                )
-            }
 
         @JvmStatic
         val context: Context
@@ -162,25 +155,23 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
         fun relaunch() {
             launchIntent?.apply {
                 flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-                val activity = currentActivity ?: return
-                finishAllActivities()
-                activity.startActivity(this)
+                val activity = currentActivity
+                if (activity != null) {
+                    activity.startActivity(this)
+                    finishAllActivities()
+                } else {
+                    context.startActivity(this)
+                }
             }
         }
 
         @JvmStatic
         fun restart() {
             finishAllActivities()
-            val pendingIntent =
-                PendingIntent.getActivity(context, 0, launchIntent, PendingIntent.FLAG_ONE_SHOT)
-            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            alarmManager.setAlarm(
-                AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime() + 100,
-                pendingIntent
-            )
-            scheduleRestartChecker()
-            exitProcess(0)
+            AppKeeper.scheduleRelaunch(context, LocalDateTime.now().plusSeconds(2))
+            Handler(Looper.getMainLooper()).postDelayed({
+                exitProcess(0)
+            }, 1000)
         }
 
         @JvmStatic
@@ -189,16 +180,13 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
         }
 
         @JvmStatic
-        fun scheduleRestart(time: Calendar) {
-            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            alarmManager.setAlarm(AlarmManager.RTC_WAKEUP, time.timeInMillis, scheduleRestartIntent)
+        fun scheduleRestart(time: LocalDateTime) {
+            AppKeeper.scheduleRestart(context, time)
         }
 
         @JvmStatic
         fun cancelScheduledRestart() {
-            val intent = scheduleRestartIntent.apply { cancel() }
-            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            alarmManager.cancel(intent)
+            AppKeeper.cancelScheduledRestart(context)
         }
 
         @JvmStatic
@@ -210,7 +198,7 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
                         ?: "monkey -p ${context.packageName} -c android.intent.category.LAUNCHER 1"
                     Logger.t(TAG).d("Trying to install update silently")
                     Handler(Looper.getMainLooper()).post {
-                        scheduleRestartChecker()
+                        AppKeeper.schedulePatrol(context)
                         val result =
                             Shell.SU.run("pm install -r -d ${apk.absolutePath}", restartCommand)
                         Logger.t(TAG).d(
@@ -299,18 +287,6 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
                 finishAllActivities()
             }
         }
-
-        private fun scheduleRestartChecker() {
-            val intent = Intent("${context.packageName}.APP_EXTENSIONS_RESTART_CHECKING")
-            val pendingIntent =
-                PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_ONE_SHOT)
-            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            alarmManager.setAlarm(
-                AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime() + 1000 * 60,
-                pendingIntent
-            )
-        }
     }
 
     private val aliveActivities = CopyOnWriteArrayList<Activity>()
@@ -336,5 +312,40 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
     }
 
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle?) {
+    }
+
+    private fun initThreeTen(application: Application) {
+        try {
+            AndroidThreeTen.init(application)
+        } catch (e: Exception) {
+            forceSetInitializer(application)
+        }
+    }
+
+    /**
+     * Copied logic from [com.jakewharton.threetenabp.AssetsZoneRulesInitializer]
+     */
+    private fun forceSetInitializer(context: Context) {
+        val assetPath = "org/threeten/bp/TZDB.dat"
+        val provider: TzdbZoneRulesProvider
+        var inputStream: InputStream? = null
+        try {
+            inputStream = context.assets.open(assetPath)
+            provider = TzdbZoneRulesProvider(inputStream)
+        } catch (e: IOException) {
+            throw IllegalStateException("$assetPath missing from assets", e)
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close()
+                } catch (ignored: IOException) {
+                }
+            }
+        }
+        try {
+            ZoneRulesProvider.registerProvider(provider)
+        } catch (ignored: ZoneRulesException) {
+            // if this exception is thrown - means it is already initialized and we are good
+        }
     }
 }
