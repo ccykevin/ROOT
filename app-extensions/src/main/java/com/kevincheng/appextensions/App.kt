@@ -181,6 +181,24 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
         }
 
         @JvmStatic
+        fun scheduleRelaunch(time: LocalTime) {
+            val now = LocalDateTime.now()
+            var target = time.atDate(now.toLocalDate())
+            if (target.isBefore(now)) target = target.plusDays(1)
+            scheduleRelaunch(target)
+        }
+
+        @JvmStatic
+        fun scheduleRelaunch(dateTime: LocalDateTime) {
+            AppKeeper.scheduleRelaunch(context, dateTime)
+        }
+
+        @JvmStatic
+        fun cancelScheduledRelaunch() {
+            AppKeeper.cancelScheduledRelaunch(context)
+        }
+
+        @JvmStatic
         fun scheduleRestart(time: LocalTime) {
             val now = LocalDateTime.now()
             var target = time.atDate(now.toLocalDate())
