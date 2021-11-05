@@ -22,12 +22,11 @@ internal class DeviceKeeper(context: Context, workerParams: WorkerParameters) :
     companion object {
         private const val restartTAG = "restart"
 
-        fun scheduleRestart(context: Context, time: LocalDateTime) {
+        fun scheduleRestart(context: Context, dateTime: LocalDateTime) {
             cancelScheduledRestart(context)
-            val now = ZonedDateTime.now()
-            var target = time.atZone(ZoneId.systemDefault())
-            if (target.isBefore(now)) target = target.plusDays(1)
-            val delay = target.toInstant().toEpochMilli() - now.toInstant().toEpochMilli()
+            val now = ZonedDateTime.now().toInstant().toEpochMilli()
+            val target = dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            val delay = (target - now).takeIf { it > 0 } ?: 0
             val request = OneTimeWorkRequestBuilder<DeviceKeeper>()
                 .addTag(restartTAG)
                 .setInitialDelay(delay, TimeUnit.MILLISECONDS)

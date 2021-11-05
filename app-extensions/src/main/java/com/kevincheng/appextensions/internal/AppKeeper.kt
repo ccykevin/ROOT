@@ -33,10 +33,10 @@ internal class AppKeeper(context: Context, workerParams: WorkerParameters) :
         private const val restartAppTAG = "restartApp"
         private const val patrolTAG = "patrol"
 
-        fun scheduleRelaunch(context: Context, time: LocalDateTime) {
+        fun scheduleRelaunch(context: Context, dateTime: LocalDateTime) {
             cancelScheduledRelaunch(context)
             val now = ZonedDateTime.now().toInstant().toEpochMilli()
-            val target = time.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            val target = dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
             val delay = (target - now).takeIf { it > 0 } ?: 0
             val request = OneTimeWorkRequestBuilder<AppKeeper>()
                 .addTag(relaunchAppTAG)
@@ -49,10 +49,10 @@ internal class AppKeeper(context: Context, workerParams: WorkerParameters) :
             WorkManager.getInstance(context).cancelAllWorkByTag(relaunchAppTAG)
         }
 
-        fun scheduleRestart(context: Context, time: LocalDateTime) {
+        fun scheduleRestart(context: Context, dateTime: LocalDateTime) {
             cancelScheduledRestart(context)
             val now = ZonedDateTime.now().toInstant().toEpochMilli()
-            val target = time.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            val target = dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
             val delay = (target - now).takeIf { it > 0 } ?: 0
             val request = OneTimeWorkRequestBuilder<AppKeeper>()
                 .addTag(restartAppTAG)

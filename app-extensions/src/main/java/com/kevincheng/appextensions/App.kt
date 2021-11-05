@@ -23,6 +23,7 @@ import com.kevincheng.extensions.requiredPermissions
 import com.kevincheng.extensions.toHex
 import com.orhanobut.logger.Logger
 import org.threeten.bp.LocalDateTime
+import org.threeten.bp.LocalTime
 import org.threeten.bp.zone.TzdbZoneRulesProvider
 import org.threeten.bp.zone.ZoneRulesException
 import org.threeten.bp.zone.ZoneRulesProvider
@@ -180,8 +181,16 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
         }
 
         @JvmStatic
-        fun scheduleRestart(time: LocalDateTime) {
-            AppKeeper.scheduleRestart(context, time)
+        fun scheduleRestart(time: LocalTime) {
+            val now = LocalDateTime.now()
+            var target = time.atDate(now.toLocalDate())
+            if (target.isBefore(now)) target = target.plusDays(1)
+            scheduleRestart(target)
+        }
+
+        @JvmStatic
+        fun scheduleRestart(dateTime: LocalDateTime) {
+            AppKeeper.scheduleRestart(context, dateTime)
         }
 
         @JvmStatic
