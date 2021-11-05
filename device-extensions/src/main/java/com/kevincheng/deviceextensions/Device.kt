@@ -17,6 +17,7 @@ import androidx.core.content.edit
 import com.kevincheng.deviceextensions.internal.DeviceKeeper
 import com.stericson.RootTools.RootTools
 import org.threeten.bp.LocalDateTime
+import org.threeten.bp.LocalTime
 import java.util.concurrent.TimeoutException
 
 class Device(private val applicationContext: Context) {
@@ -158,9 +159,18 @@ class Device(private val applicationContext: Context) {
         }
 
         @JvmStatic
-        fun scheduleRestart(time: LocalDateTime) {
+        fun scheduleRestart(time: LocalTime) {
             if (!isRooted) return
-            DeviceKeeper.scheduleRestart(context, time)
+            val now = LocalDateTime.now()
+            var target = time.atDate(now.toLocalDate())
+            if (target.isBefore(now)) target = target.plusDays(1)
+            scheduleRestart(target)
+        }
+
+        @JvmStatic
+        fun scheduleRestart(dateTime: LocalDateTime) {
+            if (!isRooted) return
+            DeviceKeeper.scheduleRestart(context, dateTime)
         }
 
         @JvmStatic
