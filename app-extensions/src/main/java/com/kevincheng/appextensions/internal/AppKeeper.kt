@@ -35,10 +35,9 @@ internal class AppKeeper(context: Context, workerParams: WorkerParameters) :
 
         fun scheduleRelaunch(context: Context, time: LocalDateTime) {
             cancelScheduledRelaunch(context)
-            val now = ZonedDateTime.now()
-            var target = time.atZone(ZoneId.systemDefault())
-            if (target.isBefore(now)) target = target.plusDays(1)
-            val delay = target.toInstant().toEpochMilli() - now.toInstant().toEpochMilli()
+            val now = ZonedDateTime.now().toInstant().toEpochMilli()
+            val target = time.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            val delay = (target - now).takeIf { it > 0 } ?: 0
             val request = OneTimeWorkRequestBuilder<AppKeeper>()
                 .addTag(relaunchAppTAG)
                 .setInitialDelay(delay, TimeUnit.MILLISECONDS)
@@ -52,10 +51,9 @@ internal class AppKeeper(context: Context, workerParams: WorkerParameters) :
 
         fun scheduleRestart(context: Context, time: LocalDateTime) {
             cancelScheduledRestart(context)
-            val now = ZonedDateTime.now()
-            var target = time.atZone(ZoneId.systemDefault())
-            if (target.isBefore(now)) target = target.plusDays(1)
-            val delay = target.toInstant().toEpochMilli() - now.toInstant().toEpochMilli()
+            val now = ZonedDateTime.now().toInstant().toEpochMilli()
+            val target = time.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            val delay = (target - now).takeIf { it > 0 } ?: 0
             val request = OneTimeWorkRequestBuilder<AppKeeper>()
                 .addTag(restartAppTAG)
                 .setInitialDelay(delay, TimeUnit.MILLISECONDS)
