@@ -27,8 +27,12 @@ class MainActivity : AppCompatActivity() {
         Logger.d("App.screenWidth@${App.screenWidth} App.screenHeight@${App.screenHeight} App.densityDpi@${App.densityDpi} App.density@${App.density} App.scaledDensity@${App.scaledDensity} App.smallestWidth@${App.smallestWidth}")
 
         rg.listener = object : IRadioGroup.Listener {
-            override fun onCheckedChanged(radioGroup: IRadioGroup, checkedButton: IRadioButton?) {
-                Logger.d(checkedButton?.value)
+            override fun onCheckedChanged(
+                radioGroup: IRadioGroup,
+                previousCheckedButton: IRadioButton?,
+                checkedButton: IRadioButton?
+            ) {
+                Logger.d("previousCheckedButton@${previousCheckedButton?.value} checkedButton@${checkedButton?.value}")
             }
         }
     }
