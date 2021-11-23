@@ -2,60 +2,37 @@ package com.kevincheng.widget
 
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Path
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffXfermode
-import android.graphics.RectF
-import android.os.Build
 import android.util.AttributeSet
 import android.util.SparseArray
 import android.view.View
 import android.widget.LinearLayout
 import androidx.annotation.IdRes
+import com.kevincheng.widget.rounded_corners.ClipViewStrategy
+import com.kevincheng.widget.rounded_corners.IRoundedView
 
-class RadioGroup @JvmOverloads constructor(
+open class RadioGroup @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyle: Int = 0
-) : LinearLayout(context, attrs, defStyle), IRadioGroup {
+) : LinearLayout(context, attrs, defStyle), IRadioGroup, IRoundedView {
 
-    override val checkedButtonId: Int get() = checkedId
-    override val buttons: SparseArray<IRadioButton> = SparseArray()
-    override var buttonListener: IRadioButton.Listener = CheckedStateTracker()
-    override var hierarchyChangeListener: IRadioGroup.OnHierarchyChangeListener =
+    final override val checkedButtonId: Int get() = checkedId
+    final override val buttons: SparseArray<IRadioButton> = SparseArray()
+    final override val buttonListener: IRadioButton.Listener = CheckedStateTracker()
+    final override val hierarchyChangeListener: IRadioGroup.OnHierarchyChangeListener =
         PassThroughHierarchyChangeListener()
-    override var listener: IRadioGroup.Listener? = null
+
+    final override var listener: IRadioGroup.Listener? = null
 
     private var checkedId = View.NO_ID
     private var lock = false
     private var isSubGroup: Boolean = false
 
-    private var cornerRadius: Float = 0f
-    private lateinit var rectF: RectF
-    private lateinit var path: Path
-    private lateinit var paint: Paint
-
-    private val roundCorners: Boolean get() = cornerRadius > 0f
+    private lateinit var clipViewStrategy: ClipViewStrategy
 
     init {
-        init(attrs)
-        if (roundCorners) {
-            path = Path()
-            paint = Paint().apply {
-                isAntiAlias = true
-                xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_IN)
-            }
-        }
+        init(context, attrs)
         super.setOnHierarchyChangeListener(hierarchyChangeListener)
-    }
-
-    private fun init(attrs: AttributeSet?) {
-        if (attrs == null) return
-        val a = context.obtainStyledAttributes(attrs, R.styleable.RadioGroup, 0, 0)
-        checkedId = a.getResourceId(R.styleable.RadioGroup_rg_checkedButton, View.NO_ID)
-        cornerRadius = a.getDimension(R.styleable.RadioGroup_rg_cornerRadius, 0f)
-        a.recycle()
     }
 
     override fun onFinishInflate() {
@@ -63,53 +40,40 @@ class RadioGroup @JvmOverloads constructor(
         if (checkedId != View.NO_ID) check(checkedId)
     }
 
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        super.onSizeChanged(w, h, oldw, oldh)
-        if (!roundCorners) return
-        rectF = RectF(0f, 0f, w.toFloat(), h.toFloat())
-        resetPath()
+    private fun init(context: Context, attrs: AttributeSet?) {
+        clipViewStrategy = ClipViewStrategy.create(
+            this,
+            context,
+            attrs,
+            R.styleable.RadioGroup,
+            R.styleable.RadioGroup_rc_radius
+        )
+        if (attrs == null) return
+        val a = context.obtainStyledAttributes(attrs, R.styleable.RadioGroup, 0, 0)
+        checkedId = a.getResourceId(R.styleable.RadioGroup_rg_checkedButton, View.NO_ID)
+        a.recycle()
     }
 
-    override fun draw(canvas: Canvas) {
-        when (roundCorners) {
-            true -> {
-                val sc = when {
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP -> canvas.saveLayer(
-                        rectF,
-                        null
-                    )
-                    else -> canvas.saveLayer(null, null, Canvas.ALL_SAVE_FLAG)
-                }
-                super.draw(canvas)
-                canvas.drawPath(path, paint)
-                canvas.restoreToCount(sc)
-            }
-            false -> super.draw(canvas)
-        }
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        super.onLayout(changed, left, top, right, bottom)
+        clipViewStrategy.onLayout(changed, left, top, right, bottom)
     }
 
     override fun dispatchDraw(canvas: Canvas) {
-        when (roundCorners) {
-            true -> {
-                val sc = when {
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP -> canvas.saveLayer(
-                        rectF,
-                        null
-                    )
-                    else -> canvas.saveLayer(null, null, Canvas.ALL_SAVE_FLAG)
-                }
-                super.dispatchDraw(canvas)
-                canvas.drawPath(path, paint)
-                canvas.restoreToCount(sc)
-            }
-            false -> super.dispatchDraw(canvas)
-        }
+        clipViewStrategy.beforeDispatchDraw(canvas)
+        super.dispatchDraw(canvas)
+        clipViewStrategy.afterDispatchDraw(canvas)
     }
 
-    private fun resetPath() {
-        path.reset()
-        path.addRoundRect(rectF, cornerRadius, cornerRadius, Path.Direction.CW)
-        path.close()
+    override fun draw(canvas: Canvas) {
+        clipViewStrategy.beforeDispatchDraw(canvas)
+        super.draw(canvas)
+        clipViewStrategy.afterDispatchDraw(canvas)
+    }
+
+    override fun setCornerRadius(cornerRadius: Float) {
+        clipViewStrategy.setCornerRadius(cornerRadius)
+        invalidate()
     }
 
     override fun check(@IdRes id: Int) {
@@ -123,7 +87,11 @@ class RadioGroup @JvmOverloads constructor(
     private fun setChecked(@IdRes id: Int, changeEvent: Boolean = true) {
         if (isSubGroup) return
         lock = true
-        buttons.get(checkedId)?.isChecked = false
+        var previousCheckedButton: IRadioButton? = null
+        buttons.get(checkedId)?.also {
+            it.isChecked = false
+            previousCheckedButton = it
+        }
         var checkedButton: IRadioButton? = null
         buttons.get(id)?.also {
             it.isChecked = true
@@ -131,11 +99,11 @@ class RadioGroup @JvmOverloads constructor(
         }
         checkedId = id
         lock = false
-        if (changeEvent) listener?.onCheckedChanged(this, checkedButton)
+        if (changeEvent) listener?.onCheckedChanged(this, previousCheckedButton, checkedButton)
     }
 
     override fun asSubgroup(parentGroup: IRadioGroup) {
-        hierarchyChangeListener.parentGroupListener = parentGroup.hierarchyChangeListener
+        super.setOnHierarchyChangeListener(parentGroup.hierarchyChangeListener)
         val tempKeys = arrayListOf<Int>()
         for (index in 0 until buttons.size()) {
             val key = buttons.keyAt(index)
@@ -152,6 +120,7 @@ class RadioGroup @JvmOverloads constructor(
     }
 
     private inner class CheckedStateTracker : IRadioButton.Listener {
+
         override fun onCheckedChanged(radioButton: IRadioButton, isChecked: Boolean) {
             if (lock) return
 
@@ -164,40 +133,28 @@ class RadioGroup @JvmOverloads constructor(
     }
 
     private inner class PassThroughHierarchyChangeListener : IRadioGroup.OnHierarchyChangeListener {
-        override var parentGroupListener: IRadioGroup.OnHierarchyChangeListener? = null
 
         override fun onChildViewAdded(parent: View, child: View) {
-            when {
-                parentGroupListener != null -> parentGroupListener?.onChildViewAdded(parent, child)
-                else -> {
-                    var id = child.id
-                    if (id == View.NO_ID) {
-                        id = View.generateViewId()
-                        child.id = id
-                    }
+            var id = child.id
+            if (id == View.NO_ID) {
+                id = View.generateViewId()
+                child.id = id
+            }
 
-                    (child as? IRadioGroup)?.also { it.asSubgroup(this@RadioGroup) }
+            (child as? IRadioGroup)?.also { it.asSubgroup(this@RadioGroup) }
 
-                    (child as? IRadioButton)?.also {
-                        it.listener = buttonListener
-                        buttons.put(it.viewId, it)
-                        if (it.isChecked) check(it.viewId)
-                    }
-                }
+            (child as? IRadioButton)?.also {
+                it.listener = buttonListener
+                buttons.put(it.viewId, it)
+                if (it.isChecked) check(it.viewId)
             }
         }
 
         override fun onChildViewRemoved(parent: View, child: View) {
-            when {
-                parentGroupListener != null -> parentGroupListener?.onChildViewRemoved(
-                    parent,
-                    child
-                )
-                else -> (child as? IRadioButton)?.also {
-                    it.listener = null
-                    buttons.remove(it.viewId)
-                    if (checkedId == it.viewId) check(View.NO_ID)
-                }
+            (child as? IRadioButton)?.also {
+                it.listener = null
+                buttons.remove(it.viewId)
+                if (checkedId == it.viewId) check(View.NO_ID)
             }
         }
     }

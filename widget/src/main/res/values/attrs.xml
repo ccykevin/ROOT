@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <attr name="rc_radius" format="dimension" />
+    <attr name="rg_checkedButton" format="reference" />
 
     <declare-styleable name="RoundedConstraintLayout">
         <attr name="rc_radius" />
@@ -16,5 +17,27 @@
 
     <declare-styleable name="RoundedRelativeLayout">
         <attr name="rc_radius" />
+    </declare-styleable>
+
+    <declare-styleable name="RadioGroup">
+        <attr name="rg_checkedButton" />
+        <attr name="rc_radius" />
+    </declare-styleable>
+
+    <declare-styleable name="FlexboxRadioGroup">
+        <attr name="rg_checkedButton" />
+        <attr name="rc_radius" />
+    </declare-styleable>
+
+    <declare-styleable name="TextClock">
+        <attr name="tc_font" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="RadioButton">
+        <attr name="rb_value" format="string|reference" />
+    </declare-styleable>
+
+    <declare-styleable name="StatefulTintColorImageView">
+        <attr name="stciv_tint" format="reference|color" />
     </declare-styleable>
 </resources>
