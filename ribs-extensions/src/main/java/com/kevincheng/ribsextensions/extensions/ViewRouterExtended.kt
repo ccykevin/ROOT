@@ -51,5 +51,6 @@ open class ViewRouterExtended<V : View, I : Interactor<*, *>, C : InteractorBase
             else -> {
             }
         }
+        (router.view as? ViewProviderView)?.handleScreenEvents(event)
     }
 }

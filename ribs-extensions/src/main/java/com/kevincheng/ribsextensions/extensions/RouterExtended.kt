@@ -50,5 +50,6 @@ open class RouterExtended<I : Interactor<*, *>, C : InteractorBaseComponent<*>>(
             else -> {
             }
         }
+        (router.view as? ViewProviderView)?.handleScreenEvents(event)
     }
 }
