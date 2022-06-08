@@ -15,8 +15,22 @@ internal class ClipViewApi18Strategy(
     context: Context,
     attributeSet: AttributeSet?,
     attrs: IntArray,
-    attrIndex: Int
-) : ClipViewStrategy(view, context, attributeSet, attrs, attrIndex) {
+    radiusId: Int,
+    topLeftRadiusId: Int,
+    topRightRadiusId: Int,
+    bottomLeftRadiusId: Int,
+    bottomRightRadiusId: Int
+) : ClipViewStrategy(
+    view,
+    context,
+    attributeSet,
+    attrs,
+    radiusId,
+    topLeftRadiusId,
+    topRightRadiusId,
+    bottomLeftRadiusId,
+    bottomRightRadiusId
+) {
 
     private val rectF: RectF = RectF()
     private val path: Path = Path()
@@ -47,7 +61,13 @@ internal class ClipViewApi18Strategy(
 
     private fun resetPath() {
         path.reset()
-        path.addRoundRect(rectF, radius, radius, Path.Direction.CW)
+        val corners = floatArrayOf(
+            topLeftRadius, topLeftRadius, // Top left radius
+            topRightRadius, topRightRadius, // Top right radius
+            bottomRightRadius, bottomRightRadius, // Bottom right radius
+            bottomLeftRadius, bottomLeftRadius // Bottom left radius
+        )
+        path.addRoundRect(rectF, corners, Path.Direction.CW)
         path.close()
     }
 }
