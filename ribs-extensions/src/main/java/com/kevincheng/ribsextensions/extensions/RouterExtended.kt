@@ -3,6 +3,7 @@ package com.kevincheng.ribsextensions.extensions
 import com.uber.rib.core.Interactor
 import com.uber.rib.core.InteractorBaseComponent
 import com.uber.rib.core.Router
+import com.uber.rib.core.ViewRouter
 import com.uber.rib.core.screenstack.lifecycle.ScreenStackEvent
 import io.reactivex.disposables.CompositeDisposable
 
@@ -13,7 +14,7 @@ open class RouterExtended<I : Interactor<*, *>, C : InteractorBaseComponent<*>>(
 ) : Router<I, C>(interactor, component) {
 
     protected val disposables = CompositeDisposable()
-    protected val attachedViewProviderRouters = ArrayList<Router<*, *>>()
+    protected val attachedViewProviderRouters = ArrayList<ViewRouter<*, *, *>>()
 
     override fun willDetach() {
         super.willDetach()
@@ -33,7 +34,7 @@ open class RouterExtended<I : Interactor<*, *>, C : InteractorBaseComponent<*>>(
         }
     }
 
-    protected open fun handleScreenEvents(router: Router<*, *>, event: ScreenStackEvent) {
+    protected open fun handleScreenEvents(router: ViewRouter<*, *, *>, event: ScreenStackEvent) {
         when (event) {
             ScreenStackEvent.APPEARED -> {
                 if (attachedViewProviderRouters.contains(router)) return
