@@ -46,7 +46,11 @@ open class FlexboxRadioGroup @JvmOverloads constructor(
             context,
             attrs,
             R.styleable.FlexboxRadioGroup,
-            R.styleable.FlexboxRadioGroup_rc_radius
+            R.styleable.FlexboxRadioGroup_rc_radius,
+            R.styleable.FlexboxRadioGroup_rc_topLeftRadius,
+            R.styleable.FlexboxRadioGroup_rc_topRightRadius,
+            R.styleable.FlexboxRadioGroup_rc_bottomLeftRadius,
+            R.styleable.FlexboxRadioGroup_rc_bottomRightRadius
         )
         if (attrs == null) return
         val a = context.obtainStyledAttributes(attrs, R.styleable.FlexboxRadioGroup, 0, 0)
@@ -73,6 +77,16 @@ open class FlexboxRadioGroup @JvmOverloads constructor(
 
     override fun setCornerRadius(cornerRadius: Float) {
         clipViewStrategy.setCornerRadius(cornerRadius)
+        invalidate()
+    }
+
+    override fun setCornerRadius(
+        topLeft: Float,
+        topRight: Float,
+        bottomLeft: Float,
+        bottomRight: Float
+    ) {
+        clipViewStrategy.setCornerRadius(topLeft, topRight, bottomLeft, bottomRight)
         invalidate()
     }
 

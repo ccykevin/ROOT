@@ -21,7 +21,17 @@ open class RoundedFrameLayout @JvmOverloads constructor(
     }
 
     private fun initClipViewStrategy(context: Context, attrs: AttributeSet?) {
-        clipViewStrategy = ClipViewStrategy.create(this, context, attrs, R.styleable.RoundedFrameLayout, R.styleable.RoundedFrameLayout_rc_radius)
+        clipViewStrategy = ClipViewStrategy.create(
+            this,
+            context,
+            attrs,
+            R.styleable.RoundedFrameLayout,
+            R.styleable.RoundedFrameLayout_rc_radius,
+            R.styleable.RoundedFrameLayout_rc_topLeftRadius,
+            R.styleable.RoundedFrameLayout_rc_topRightRadius,
+            R.styleable.RoundedFrameLayout_rc_bottomLeftRadius,
+            R.styleable.RoundedFrameLayout_rc_bottomRightRadius
+        )
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
@@ -43,6 +53,16 @@ open class RoundedFrameLayout @JvmOverloads constructor(
 
     override fun setCornerRadius(cornerRadius: Float) {
         clipViewStrategy.setCornerRadius(cornerRadius)
+        invalidate()
+    }
+
+    override fun setCornerRadius(
+        topLeft: Float,
+        topRight: Float,
+        bottomLeft: Float,
+        bottomRight: Float
+    ) {
+        clipViewStrategy.setCornerRadius(topLeft, topRight, bottomLeft, bottomRight)
         invalidate()
     }
 }

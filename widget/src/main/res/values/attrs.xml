@@ -1,32 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <attr name="rc_radius" format="dimension" />
+    <attr name="rc_topLeftRadius" format="dimension" />
+    <attr name="rc_topRightRadius" format="dimension" />
+    <attr name="rc_bottomLeftRadius" format="dimension" />
+    <attr name="rc_bottomRightRadius" format="dimension" />
     <attr name="rg_checkedButton" format="reference" />
 
     <declare-styleable name="RoundedConstraintLayout">
         <attr name="rc_radius" />
+        <attr name="rc_topLeftRadius" />
+        <attr name="rc_topRightRadius" />
+        <attr name="rc_bottomLeftRadius" />
+        <attr name="rc_bottomRightRadius" />
     </declare-styleable>
 
     <declare-styleable name="RoundedFrameLayout">
         <attr name="rc_radius" />
+        <attr name="rc_topLeftRadius" />
+        <attr name="rc_topRightRadius" />
+        <attr name="rc_bottomLeftRadius" />
+        <attr name="rc_bottomRightRadius" />
     </declare-styleable>
 
     <declare-styleable name="RoundedLinearLayout">
         <attr name="rc_radius" />
+        <attr name="rc_topLeftRadius" />
+        <attr name="rc_topRightRadius" />
+        <attr name="rc_bottomLeftRadius" />
+        <attr name="rc_bottomRightRadius" />
     </declare-styleable>
 
     <declare-styleable name="RoundedRelativeLayout">
         <attr name="rc_radius" />
+        <attr name="rc_topLeftRadius" />
+        <attr name="rc_topRightRadius" />
+        <attr name="rc_bottomLeftRadius" />
+        <attr name="rc_bottomRightRadius" />
     </declare-styleable>
 
     <declare-styleable name="RadioGroup">
         <attr name="rg_checkedButton" />
         <attr name="rc_radius" />
+        <attr name="rc_topLeftRadius" />
+        <attr name="rc_topRightRadius" />
+        <attr name="rc_bottomLeftRadius" />
+        <attr name="rc_bottomRightRadius" />
     </declare-styleable>
 
     <declare-styleable name="FlexboxRadioGroup">
         <attr name="rg_checkedButton" />
         <attr name="rc_radius" />
+        <attr name="rc_topLeftRadius" />
+        <attr name="rc_topRightRadius" />
+        <attr name="rc_bottomLeftRadius" />
+        <attr name="rc_bottomRightRadius" />
     </declare-styleable>
 
     <declare-styleable name="TextClock">
