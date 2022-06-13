@@ -34,7 +34,13 @@ internal class ClipViewApi21Strategy(
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     override fun beforeDispatchDraw(canvas: Canvas) {
-        view.clipToOutline = true
+        view.clipToOutline = arrayOf(
+            radius != DEFAULT_CORNER_RADIUS,
+            topLeftRadius != DEFAULT_CORNER_RADIUS,
+            topRightRadius != DEFAULT_CORNER_RADIUS,
+            bottomLeftRadius != DEFAULT_CORNER_RADIUS,
+            bottomRightRadius != DEFAULT_CORNER_RADIUS
+        ).any { it }
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
