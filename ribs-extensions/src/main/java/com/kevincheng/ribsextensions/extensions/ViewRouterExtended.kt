@@ -38,10 +38,11 @@ open class ViewRouterExtended<V : View, I : Interactor<*, *>, C : InteractorBase
     protected open fun handleScreenEvents(router: ViewRouter<*, *, *>, event: ScreenStackEvent) {
         when (event) {
             ScreenStackEvent.APPEARED -> {
-                if (attachedViewProviderRouters.contains(router)) return
-                router.also {
-                    attachChild(it)
-                    attachedViewProviderRouters.add(it)
+                if (!attachedViewProviderRouters.contains(router)) {
+                    router.also {
+                        attachChild(it)
+                        attachedViewProviderRouters.add(it)
+                    }
                 }
             }
             ScreenStackEvent.REMOVED -> router.also {
