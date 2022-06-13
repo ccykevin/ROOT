@@ -1,3 +1,9 @@
 <resources>
-    <string name="app_name">ROOT</string>
+    <string name="app_name" translatable="false">ROOT</string>
+
+    <string name="lang_en" translatable="false">en</string>
+    <string name="lang_hk" translatable="false">zh_HK</string>
+    <string name="lang_es" translatable="false">es</string>
+
+    <string name="hello">Hello World!</string>
 </resources>

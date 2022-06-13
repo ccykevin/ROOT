@@ -14,6 +14,7 @@ import android.provider.Settings
 import android.util.DisplayMetrics
 import android.view.WindowManager
 import androidx.core.content.FileProvider
+import androidx.core.content.edit
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.jaredrummler.android.shell.Shell
 import com.kevincheng.appextensions.internal.AppKeeper
@@ -31,12 +32,15 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.security.MessageDigest
+import java.util.Locale
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.system.exitProcess
 
 class App(private val applicationContext: Context) : Application.ActivityLifecycleCallbacks {
     companion object {
         private const val TAG = "APP_EXTENSIONS"
+        private const val APP_LOCALE = "App.Locale"
+
         const val REQUEST_CODE_INSTALL = 999
 
         private lateinit var shared: App
@@ -229,13 +233,17 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
                         val result =
                             Shell.SU.run("pm install -r -d ${apk.absolutePath}", restartCommand)
                         Logger.t(TAG).d(
-                            "Install ${when (result.isSuccessful) {
-                                true -> "succeeded"
-                                false -> "failed"
-                            }} -> ${when (result.isSuccessful) {
-                                true -> result.stdout
-                                false -> result.stderr
-                            }}"
+                            "Install ${
+                                when (result.isSuccessful) {
+                                    true -> "succeeded"
+                                    false -> "failed"
+                                }
+                            } -> ${
+                                when (result.isSuccessful) {
+                                    true -> result.stdout
+                                    false -> result.stderr
+                                }
+                            }"
                         )
                     }
                 }
@@ -312,6 +320,46 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
             intent?.run {
                 context.startActivity(this)
                 finishAllActivities()
+            }
+        }
+
+        @JvmStatic
+        fun loadConfiguration(context: Context, defLocale: Locale? = null): Context {
+            val locale = defLocale ?: Preferences.getString(
+                APP_LOCALE,
+                null
+            )?.let { code ->
+                code.split("_").let { it ->
+                    when (it.size > 1) {
+                        true -> Locale(it[0], it[1])
+                        false -> Locale(it[0])
+                    }
+                }
+            } ?: Locale.getDefault()
+            return setLocale(locale, context)
+        }
+
+        @JvmStatic
+        fun setLocale(locale: Locale, base: Context = context): Context {
+            Preferences.get().edit(commit = true) {
+                putString(APP_LOCALE, locale.toString())
+            }
+            Locale.setDefault(locale)
+            return when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> {
+                    val configuration = base.resources.configuration
+                    configuration.setLocale(locale)
+                    configuration.setLayoutDirection(locale)
+                    base.createConfigurationContext(configuration)
+                }
+                else -> {
+                    val resources = base.resources
+                    val configuration = resources.configuration
+                    configuration.locale = locale
+                    configuration.setLayoutDirection(locale)
+                    resources.updateConfiguration(configuration, resources.displayMetrics)
+                    return base
+                }
             }
         }
     }
