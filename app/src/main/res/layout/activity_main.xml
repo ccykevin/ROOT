@@ -7,7 +7,7 @@
     tools:context=".MainActivity">
 
     <com.kevincheng.widget.RadioGroup
-        android:id="@+id/rg"
+        android:id="@+id/rg_language"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="#000000"
@@ -15,56 +15,88 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/viewGroup_greenCircle"
-        app:rc_radius="8dp"
-        app:rg_checkedButton="@id/rb_1">
+        app:rc_radius="8dp">
 
         <com.kevincheng.widget.RadioButton
-            android:id="@+id/rb_1"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            app:rb_value="1">
+            android:id="@+id/rb_en"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:rb_value="@string/lang_en">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/textView_en"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/lang_en"
+                android:textColor="#FFFFFF"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <com.kevincheng.widget.StatefulTintColorImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:duplicateParentState="true"
                 android:src="@drawable/ic_enter"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textView_en"
                 app:stciv_tint="@color/radio_button_icon" />
 
         </com.kevincheng.widget.RadioButton>
 
         <com.kevincheng.widget.RadioButton
-            android:id="@+id/rb_2"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            app:rb_value="2">
+            android:id="@+id/rb_hk"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:rb_value="@string/lang_hk">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/textView_hk"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/lang_hk"
+                android:textColor="#FFFFFF"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <com.kevincheng.widget.StatefulTintColorImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:duplicateParentState="true"
                 android:src="@drawable/ic_enter"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textView_hk"
                 app:stciv_tint="@color/radio_button_icon" />
 
         </com.kevincheng.widget.RadioButton>
 
         <com.kevincheng.widget.RadioButton
-            android:id="@+id/rb_3"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            app:rb_value="3">
+            android:id="@+id/rb_es"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:rb_value="@string/lang_es">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/textView_es"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/lang_es"
+                android:textColor="#FFFFFF"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <com.kevincheng.widget.StatefulTintColorImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:duplicateParentState="true"
                 android:src="@drawable/ic_enter"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textView_es"
                 app:stciv_tint="@color/radio_button_icon" />
 
         </com.kevincheng.widget.RadioButton>
@@ -83,10 +115,11 @@
         app:rc_radius="40dp">
 
         <TextView
+            android:id="@+id/textView_hello"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:text="Hello World!" />
+            android:text="@string/hello" />
     </com.kevincheng.widget.RoundedFrameLayout>
 
     <com.kevincheng.widget.TextClock
