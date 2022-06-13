@@ -18,6 +18,7 @@ import androidx.core.content.edit
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.jaredrummler.android.shell.Shell
 import com.kevincheng.appextensions.internal.AppKeeper
+import com.kevincheng.extensions.defaultSharedPreferences
 import com.kevincheng.extensions.isGrantedRequiredPermissions
 import com.kevincheng.extensions.launchIntent
 import com.kevincheng.extensions.requiredPermissions
@@ -325,7 +326,7 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
 
         @JvmStatic
         fun loadConfiguration(context: Context, defLocale: Locale? = null): Context {
-            val locale = defLocale ?: Preferences.getString(
+            val locale = defLocale ?: context.defaultSharedPreferences.getString(
                 APP_LOCALE,
                 null
             )?.let { code ->
@@ -341,7 +342,7 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
 
         @JvmStatic
         fun setLocale(locale: Locale, base: Context = context): Context {
-            Preferences.get().edit(commit = true) {
+            base.defaultSharedPreferences.edit(commit = true) {
                 putString(APP_LOCALE, locale.toString())
             }
             Locale.setDefault(locale)
