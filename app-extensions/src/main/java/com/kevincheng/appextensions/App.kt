@@ -326,7 +326,7 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
 
         @JvmStatic
         fun loadConfiguration(context: Context, defLocale: Locale? = null): Context {
-            val locale = defLocale ?: context.defaultSharedPreferences.getString(
+            val locale = context.defaultSharedPreferences.getString(
                 APP_LOCALE,
                 null
             )?.let { code ->
@@ -336,7 +336,7 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
                         false -> Locale(it[0])
                     }
                 }
-            } ?: Locale.getDefault()
+            } ?: defLocale ?: Locale.getDefault()
             return setLocale(locale, context)
         }
 
