@@ -387,7 +387,7 @@ class App(private val applicationContext: Context) : Application.ActivityLifecyc
         aliveActivities.takeIf { it.contains(activity) }?.also { it.remove(activity) }
     }
 
-    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle?) {
+    override fun onActivitySaveInstanceState(p0: Activity, p1: Bundle) {
     }
 
     private fun initThreeTen(application: Application) {

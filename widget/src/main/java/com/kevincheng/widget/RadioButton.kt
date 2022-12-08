@@ -40,9 +40,11 @@ open class RadioButton @JvmOverloads constructor(
     }
 
     private fun init(attrs: AttributeSet?) {
-        setOnClickListener {
-            if (!isChecked) toggle()
-        }
+        setOnClickListener(object : View.OnClickListener {
+            override fun onClick(p0: View?) {
+                if (!isChecked) toggle()
+            }
+        })
         isClickable = false
         if (attrs == null) return
         val a = context.obtainStyledAttributes(attrs, R.styleable.RadioButton, 0, 0)

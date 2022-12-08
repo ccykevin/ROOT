@@ -41,8 +41,8 @@ internal class DiskLogStrategy(private val handler: Handler) : LogStrategy {
         private val ROOT_DIRECTORY = rootDirectory(context)
         private val dailyLogFileCounter: HashMap<String, Int> = hashMapOf()
 
-        override fun handleMessage(msg: Message?) {
-            val log = msg?.obj as? String ?: return
+        override fun handleMessage(msg: Message) {
+            val log = msg.obj as? String ?: return
 
             val logFile = getLogFile()
             var fileWriter: FileWriter? = null
