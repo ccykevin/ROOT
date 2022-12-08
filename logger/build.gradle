@@ -33,5 +33,6 @@ repositories {
 dependencies {
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     compileOnly "com.squareup.okhttp3:okhttp:3.14.9"
+    implementation project(path: ':extensions')
     api 'com.orhanobut:logger:2.2.0'
 }

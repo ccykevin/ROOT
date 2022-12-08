@@ -15,6 +15,7 @@ import android.util.TypedValue
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
+import java.io.File
 
 fun Context.isServiceRunning(service: Class<*>): Boolean {
     return (getSystemService(ACTIVITY_SERVICE) as ActivityManager)
@@ -74,4 +75,8 @@ fun Context.getColorFromAttr(
 ): Int {
     theme.resolveAttribute(attrColor, typedValue, resolveRefs)
     return typedValue.data
+}
+
+fun Context.getStorageDirectory(directoryType: String? = null): File {
+    return getExternalFilesDir(directoryType) ?: filesDir
 }

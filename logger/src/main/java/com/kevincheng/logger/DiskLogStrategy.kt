@@ -1,11 +1,11 @@
 package com.kevincheng.logger
 
 import android.content.Context
-import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.util.Log
+import com.kevincheng.extensions.getStorageDirectory
 import com.orhanobut.logger.LogStrategy
 import java.io.File
 import java.io.FileWriter
@@ -25,7 +25,7 @@ internal class DiskLogStrategy(private val handler: Handler) : LogStrategy {
     companion object {
         val dateDirectoryFormatter = SimpleDateFormat("yyyyMMdd", Locale.UK)
 
-        fun rootDirectory(context: Context): File = File(Environment.getExternalStorageDirectory(), "logger/${context.packageName}")
+        fun rootDirectory(context: Context): File = File(context.getStorageDirectory(), "logger")
     }
 
     override fun log(priority: Int, tag: String?, message: String) {
