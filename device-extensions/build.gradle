@@ -11,10 +11,10 @@ apply from: "$rootDir/ktlint.gradle"
 group='com.github.ccykevin.ROOT'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 31
     defaultConfig {
         minSdkVersion 17
-        targetSdkVersion 29
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
     }
@@ -29,12 +29,11 @@ android {
         targetCompatibility deps.build.javaVersion
     }
     kotlinOptions {
-        jvmTarget = deps.build.javaVersion
+        jvmTarget = "1.8"
     }
 }
 
 dependencies {
-    compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation project(path: ':extensions')
     implementation deps.androidx.coreKtx
     implementation deps.androidx.workRuntimeKtx

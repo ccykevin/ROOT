@@ -7,11 +7,11 @@ apply plugin: 'kotlin-android-extensions'
 apply from: "$rootDir/ktlint.gradle"
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 31
     defaultConfig {
         applicationId "com.kevincheng.rootexample"
         minSdkVersion 17
-        targetSdkVersion 29
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
         resValue("bool", "logger_loggable", "true")
@@ -32,7 +32,6 @@ android {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation deps.androidx.appcompat
     implementation deps.androidx.coreKtx
 
